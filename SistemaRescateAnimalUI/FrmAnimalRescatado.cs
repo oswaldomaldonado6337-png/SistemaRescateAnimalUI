@@ -1,10 +1,10 @@
 ﻿/* ============================================================================
  * ASIGNATURA: Interacción Hombre-Computadora
- * ACTIVIDAD 3.1: Gestión de Eventos y Validaciones de Entrada
+ * ACTIVIDAD 3.3: Diálogos y Ventanas Modales
  * INTEGRANTES:
- *   - FLORES MONTANO, Carlos Roberto
- *   - GONZALEZ ALVARADO, Alexa Michelle
- *   - MALDONADO LLAMAS, Oswaldo Daniel
+ *    - FLORES MONTANO, Carlos Roberto
+ *    - GONZALEZ ALVARADO, Alexa Michelle
+ *    - MALDONADO LLAMAS, Oswaldo Daniel
  * ============================================================================ */
 
 using System;
@@ -142,6 +142,10 @@ namespace SistemaRescateAnimalUI
                 };
 
                 _modeloAnimal.InsertarRegistro(animal);
+
+                // Asignamos el ID directamente al control para que no quede vacío si queremos eliminar de inmediato
+                txtId.Text = idFinal;
+
                 MessageBox.Show($"Animal '{animal.Nombre}' guardado correctamente con ID: {animal.Id}",
                                 "Sistema", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -155,7 +159,7 @@ namespace SistemaRescateAnimalUI
 
         public void EjecutarBuscar(string id, ErrorProvider alerta)
         {
-            // Configurar la posición del icono a la IZQUIERDA para evitar que el botón Buscar lo tape
+            // Posicionar el icono del ErrorProvider a la izquierda
             errorProvider1.SetIconAlignment(txtId, ErrorIconAlignment.MiddleLeft);
             errorProvider1.SetIconPadding(txtId, 5);
 
@@ -167,7 +171,7 @@ namespace SistemaRescateAnimalUI
             }
             errorProvider1.SetError(txtId, "");
 
-            // 1. Validar si está vacío
+            // 1. Validar que no esté vacío
             if (string.IsNullOrWhiteSpace(id))
             {
                 string msjVacio = "Ingrese un ID válido para buscar.";
@@ -177,18 +181,15 @@ namespace SistemaRescateAnimalUI
                 return;
             }
 
-            // 2. Validar símbolos o caracteres especiales
+            // 2. Validar caracteres especiales
             foreach (char c in id)
             {
                 if (!char.IsLetterOrDigit(c))
                 {
                     string msjSimbolo = "El ID no debe contener símbolos o caracteres especiales (% , & , *).";
-
-                    // Asignar icono visual a la izquierda
                     errorProvider1.SetError(txtId, msjSimbolo);
                     if (alerta != null) alerta.SetError(txtId, msjSimbolo);
 
-                    // Limpiar campos para dar retroalimentación visual de fallo
                     LimpiarFormulario();
                     txtId.Text = id;
 
@@ -197,7 +198,7 @@ namespace SistemaRescateAnimalUI
                 }
             }
 
-            // 3. Consultar modelo
+            // 3. Consultar en el modelo
             var resultado = _modeloAnimal.ConsultarRegistro(id) as AnimalRescatado;
 
             if (resultado != null)
@@ -263,6 +264,20 @@ namespace SistemaRescateAnimalUI
                     return;
                 }
 
+                // Pregunta obligatoria con MessageBox.Show y evaluación de DialogResult (Requisito A3.3)
+                DialogResult respuesta = MessageBox.Show(
+                    $"¿Está seguro de que desea eliminar el registro con ID '{idAEliminar}'?",
+                    "Confirmación de Eliminación",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+                // Si selecciona No, aborta inmediatamente el proceso sin borrar nada
+                if (respuesta == DialogResult.No)
+                {
+                    return;
+                }
+
                 _modeloAnimal.EliminarRegistro(idAEliminar);
 
                 if (barraEstado != null)
@@ -280,6 +295,40 @@ namespace SistemaRescateAnimalUI
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al eliminar: {ex.Message}", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        // Exportación de datos utilizando SaveFileDialog con filtros (Requisito A3.3)
+        public void ExportarExpedienteTXT()
+        {
+            if (string.IsNullOrWhiteSpace(txtId.Text))
+            {
+                MessageBox.Show("Primero busque o cargue un registro para exportar.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Title = "Guardar Expediente de Animal Rescatado";
+                saveFileDialog.Filter = "Archivos de texto (*.txt)|*.txt|Todos los archivos (*.*)|*.*";
+                saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                saveFileDialog.FileName = $"Expediente_{txtId.Text}.txt";
+
+                // Evaluamos que el usuario haya hecho clic en Guardar
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string datos = $"EXPEDIENTE DE ANIMAL RESCATADO\n" +
+                                   $"-----------------------------\n" +
+                                   $"ID: {txtId.Text}\n" +
+                                   $"Nombre: {txtNombre.Text}\n" +
+                                   $"Especie: {txtEspecie.Text}\n" +
+                                   $"Peso: {numPeso.Text} kg\n" +
+                                   $"Fecha: {dtpFechaRegistro.Value:dd/MM/yyyy}\n" +
+                                   $"Estado: {(chkEsActivo.Checked ? "Activo" : "Inactivo")}";
+
+                    System.IO.File.WriteAllText(saveFileDialog.FileName, datos);
+                    MessageBox.Show("Expediente exportado correctamente a TXT.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
         }
 

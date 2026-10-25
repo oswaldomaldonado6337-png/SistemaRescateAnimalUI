@@ -37,6 +37,7 @@
             numPeso = new NumericUpDown();
             dtpFechaRegistro = new DateTimePicker();
             chkEsActivo = new CheckBox();
+            label5 = new Label();
             ((System.ComponentModel.ISupportInitialize)numPeso).BeginInit();
             SuspendLayout();
             // 
@@ -114,11 +115,21 @@
             chkEsActivo.Text = "Esta Activo?";
             chkEsActivo.UseVisualStyleBackColor = true;
             // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(12, 18);
+            label5.Name = "label5";
+            label5.Size = new Size(1046, 25);
+            label5.TabIndex = 10;
+            label5.Text = "FLORES MONTANO Carlos Roberto, GONZALEZ ALVARADO Alexa Michelle, MALDONADO LLAMAS Oswaldo Daniel - Equipo [E5]   ";
+            // 
             // FrmAnimalRescatado
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(1050, 488);
+            Controls.Add(label5);
             Controls.Add(chkEsActivo);
             Controls.Add(dtpFechaRegistro);
             Controls.Add(numPeso);
@@ -128,6 +139,9 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(txtNombre);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
             Name = "FrmAnimalRescatado";
             Text = "FrmAnimalRescatado";
             ((System.ComponentModel.ISupportInitialize)numPeso).EndInit();
@@ -146,5 +160,6 @@
         private NumericUpDown numPeso;
         private DateTimePicker dtpFechaRegistro;
         private CheckBox chkEsActivo;
+        private Label label5;
     }
 }

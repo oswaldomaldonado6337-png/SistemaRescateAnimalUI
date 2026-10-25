@@ -17,108 +17,140 @@
 
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.pnlBarraHerramientas = new System.Windows.Forms.FlowLayoutPanel();
-            this.lblId = new System.Windows.Forms.Label();
-            this.txtIdBusqueda = new System.Windows.Forms.TextBox();
-            this.btnMasterBuscar = new System.Windows.Forms.Button();
-            this.btnMasterGuardar = new System.Windows.Forms.Button();
-            this.btnMasterActualizar = new System.Windows.Forms.Button();
-            this.btnMasterEliminar = new System.Windows.Forms.Button();
-            this.pnlContenedorVistas = new System.Windows.Forms.Panel();
-            this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.pnlBarraHerramientas.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
-            this.SuspendLayout();
+            components = new System.ComponentModel.Container();
+            pnlBarraHerramientas = new FlowLayoutPanel();
+            lblId = new Label();
+            txtIdBusqueda = new TextBox();
+            btnMasterBuscar = new Button();
+            btnMasterGuardar = new Button();
+            btnMasterActualizar = new Button();
+            btnMasterEliminar = new Button();
+            pnlContenedorVistas = new Panel();
+            errorProvider1 = new ErrorProvider(components);
+            statusStrip1 = new StatusStrip();
+            pnlBarraHerramientas.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
+            SuspendLayout();
             // 
             // pnlBarraHerramientas
             // 
-            this.pnlBarraHerramientas.AutoSize = true;
-            this.pnlBarraHerramientas.Controls.Add(this.lblId);
-            this.pnlBarraHerramientas.Controls.Add(this.txtIdBusqueda);
-            this.pnlBarraHerramientas.Controls.Add(this.btnMasterBuscar);
-            this.pnlBarraHerramientas.Controls.Add(this.btnMasterGuardar);
-            this.pnlBarraHerramientas.Controls.Add(this.btnMasterActualizar);
-            this.pnlBarraHerramientas.Controls.Add(this.btnMasterEliminar);
-            this.pnlBarraHerramientas.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlBarraHerramientas.Padding = new System.Windows.Forms.Padding(10);
-            this.pnlBarraHerramientas.Size = new System.Drawing.Size(900, 50);
-            this.pnlBarraHerramientas.TabIndex = 0;
+            pnlBarraHerramientas.AutoSize = true;
+            pnlBarraHerramientas.Controls.Add(lblId);
+            pnlBarraHerramientas.Controls.Add(txtIdBusqueda);
+            pnlBarraHerramientas.Controls.Add(btnMasterBuscar);
+            pnlBarraHerramientas.Controls.Add(btnMasterGuardar);
+            pnlBarraHerramientas.Controls.Add(btnMasterActualizar);
+            pnlBarraHerramientas.Controls.Add(btnMasterEliminar);
+            pnlBarraHerramientas.Dock = DockStyle.Top;
+            pnlBarraHerramientas.Location = new Point(0, 0);
+            pnlBarraHerramientas.Margin = new Padding(4, 4, 4, 4);
+            pnlBarraHerramientas.Name = "pnlBarraHerramientas";
+            pnlBarraHerramientas.Padding = new Padding(12, 12, 12, 12);
+            pnlBarraHerramientas.Size = new Size(1125, 70);
+            pnlBarraHerramientas.TabIndex = 0;
             // 
             // lblId
             // 
-            this.lblId.AutoSize = true;
-            this.lblId.Padding = new System.Windows.Forms.Padding(0, 6, 0, 0);
-            this.lblId.Text = "ID:";
+            lblId.AutoSize = true;
+            lblId.Location = new Point(16, 12);
+            lblId.Margin = new Padding(4, 0, 4, 0);
+            lblId.Name = "lblId";
+            lblId.Padding = new Padding(0, 8, 0, 0);
+            lblId.Size = new Size(34, 33);
+            lblId.TabIndex = 0;
+            lblId.Text = "ID:";
             // 
             // txtIdBusqueda
             // 
-            this.txtIdBusqueda.Size = new System.Drawing.Size(120, 27);
+            txtIdBusqueda.Location = new Point(58, 16);
+            txtIdBusqueda.Margin = new Padding(4, 4, 4, 4);
+            txtIdBusqueda.Name = "txtIdBusqueda";
+            txtIdBusqueda.Size = new Size(149, 31);
+            txtIdBusqueda.TabIndex = 1;
             // 
             // btnMasterBuscar
             // 
-            this.btnMasterBuscar.Size = new System.Drawing.Size(100, 30);
-            this.btnMasterBuscar.Text = "Buscar";
-            this.btnMasterBuscar.UseVisualStyleBackColor = true;
-            this.btnMasterBuscar.Click += new System.EventHandler(this.btnMasterBuscar_Click);
+            btnMasterBuscar.Location = new Point(215, 16);
+            btnMasterBuscar.Margin = new Padding(4, 4, 4, 4);
+            btnMasterBuscar.Name = "btnMasterBuscar";
+            btnMasterBuscar.Size = new Size(125, 38);
+            btnMasterBuscar.TabIndex = 2;
+            btnMasterBuscar.Text = "Buscar";
+            btnMasterBuscar.UseVisualStyleBackColor = true;
+            btnMasterBuscar.Click += btnMasterBuscar_Click;
             // 
             // btnMasterGuardar
             // 
-            this.btnMasterGuardar.Size = new System.Drawing.Size(100, 30);
-            this.btnMasterGuardar.Text = "Guardar";
-            this.btnMasterGuardar.UseVisualStyleBackColor = true;
-            this.btnMasterGuardar.Click += new System.EventHandler(this.btnMasterGuardar_Click);
+            btnMasterGuardar.Location = new Point(348, 16);
+            btnMasterGuardar.Margin = new Padding(4, 4, 4, 4);
+            btnMasterGuardar.Name = "btnMasterGuardar";
+            btnMasterGuardar.Size = new Size(125, 38);
+            btnMasterGuardar.TabIndex = 3;
+            btnMasterGuardar.Text = "Guardar";
+            btnMasterGuardar.UseVisualStyleBackColor = true;
+            btnMasterGuardar.Click += btnMasterGuardar_Click;
             // 
             // btnMasterActualizar
             // 
-            this.btnMasterActualizar.Size = new System.Drawing.Size(100, 30);
-            this.btnMasterActualizar.Text = "Actualizar";
-            this.btnMasterActualizar.UseVisualStyleBackColor = true;
-            this.btnMasterActualizar.Click += new System.EventHandler(this.btnMasterActualizar_Click);
+            btnMasterActualizar.Location = new Point(481, 16);
+            btnMasterActualizar.Margin = new Padding(4, 4, 4, 4);
+            btnMasterActualizar.Name = "btnMasterActualizar";
+            btnMasterActualizar.Size = new Size(125, 38);
+            btnMasterActualizar.TabIndex = 4;
+            btnMasterActualizar.Text = "Actualizar";
+            btnMasterActualizar.UseVisualStyleBackColor = true;
+            btnMasterActualizar.Click += btnMasterActualizar_Click;
             // 
             // btnMasterEliminar
             // 
-            this.btnMasterEliminar.Size = new System.Drawing.Size(100, 30);
-            this.btnMasterEliminar.Text = "Eliminar";
-            this.btnMasterEliminar.UseVisualStyleBackColor = true;
-            this.btnMasterEliminar.Click += new System.EventHandler(this.btnMasterEliminar_Click);
+            btnMasterEliminar.Location = new Point(614, 16);
+            btnMasterEliminar.Margin = new Padding(4, 4, 4, 4);
+            btnMasterEliminar.Name = "btnMasterEliminar";
+            btnMasterEliminar.Size = new Size(125, 38);
+            btnMasterEliminar.TabIndex = 5;
+            btnMasterEliminar.Text = "Eliminar";
+            btnMasterEliminar.UseVisualStyleBackColor = true;
+            btnMasterEliminar.Click += btnMasterEliminar_Click;
             // 
             // pnlContenedorVistas
             // 
-            this.pnlContenedorVistas.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlContenedorVistas.Location = new System.Drawing.Point(0, 50);
-            this.pnlContenedorVistas.Name = "pnlContenedorVistas";
-            this.pnlContenedorVistas.Size = new System.Drawing.Size(900, 500);
-            this.pnlContenedorVistas.TabIndex = 1;
+            pnlContenedorVistas.Dock = DockStyle.Fill;
+            pnlContenedorVistas.Location = new Point(0, 70);
+            pnlContenedorVistas.Margin = new Padding(4, 4, 4, 4);
+            pnlContenedorVistas.Name = "pnlContenedorVistas";
+            pnlContenedorVistas.Size = new Size(1125, 596);
+            pnlContenedorVistas.TabIndex = 1;
             // 
             // errorProvider1
             // 
-            this.errorProvider1.ContainerControl = this;
+            errorProvider1.ContainerControl = this;
             // 
             // statusStrip1
             // 
-            this.statusStrip1.Location = new System.Drawing.Point(0, 528);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(900, 22);
-            this.statusStrip1.TabIndex = 2;
+            statusStrip1.ImageScalingSize = new Size(24, 24);
+            statusStrip1.Location = new Point(0, 666);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Padding = new Padding(1, 0, 18, 0);
+            statusStrip1.Size = new Size(1125, 22);
+            statusStrip1.TabIndex = 2;
             // 
             // FrmPrincipal
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(900, 550);
-            this.Controls.Add(this.pnlContenedorVistas);
-            this.Controls.Add(this.pnlBarraHerramientas);
-            this.Controls.Add(this.statusStrip1);
-            this.Name = "FrmPrincipal";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Sistema Rescate Animal - Formulario Principal";
-            this.pnlBarraHerramientas.ResumeLayout(false);
-            this.pnlBarraHerramientas.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(1125, 688);
+            Controls.Add(pnlContenedorVistas);
+            Controls.Add(pnlBarraHerramientas);
+            Controls.Add(statusStrip1);
+            Margin = new Padding(4, 4, 4, 4);
+            Name = "FrmPrincipal";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Sistema Rescate Animal - Formulario Principal";
+            pnlBarraHerramientas.ResumeLayout(false);
+            pnlBarraHerramientas.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)errorProvider1).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
