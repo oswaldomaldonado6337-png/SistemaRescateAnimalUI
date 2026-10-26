@@ -1,13 +1,12 @@
-﻿/* ============================================================================
- * ASIGNATURA: Interacción Hombre-Computadora
- * ACTIVIDAD 3.3: Diálogos y Ventanas Modales
- * INTEGRANTES:
- *    - FLORES MONTANO, Carlos Roberto
- *    - GONZALEZ ALVARADO, Alexa Michelle
- *    - MALDONADO LLAMAS, Oswaldo Daniel
- * ============================================================================ */
+﻿// ============================================================================
+// INTEGRANTES - EQUIPO 5:
+// - FLORES MONTANO, Carlos Roberto
+// - GONZALEZ ALVARADO, Alexa Michelle
+// - MALDONADO LLAMAS, Oswaldo Daniel
+// ============================================================================
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Media;
@@ -18,35 +17,159 @@ namespace SistemaRescateAnimalUI
 {
     public partial class FrmAnimalRescatado : FrmBase, IPanelCRUD
     {
-        // Instancia estática del modelo en memoria RAM
+        // Instancia principal del modelo para conservar registros en memoria RAM
         private static AnimalRescatado _modeloAnimal = new AnimalRescatado();
-
-        // ErrorProvider local para alertas de error
         private ErrorProvider errorProvider1 = new ErrorProvider();
+
+        // Objeto de nuestra clase de la Pila (Actividad 2.5)
+        private AnimalHistorial historialPila = new AnimalHistorial();
+
+        // Controles que agregamos dinámicamente para la interfaz de la Pila
+        private GroupBox grpPila = new GroupBox();
+        private TextBox txtEstado = new TextBox();
+        private Button btnRegistrarEstado = new Button();
+        private Button btnDeshacer = new Button();
+        private ListBox lstHistorial = new ListBox();
+        private Label lblCima = new Label();
 
         public FrmAnimalRescatado()
         {
             InitializeComponent();
             ConfigurarValidaciones();
+
+            // Al arrancar el formulario creamos la sección de la pila a la derecha y refrescamos los controles
+            InicializarControlesPila();
+            ActualizarInterfaz();
         }
 
         private void ConfigurarValidaciones()
         {
-            // Filtros de teclado (KeyPress)
+            // Eventos KeyPress para evitar que escriban caracteres raros en los textos
             txtNombre.KeyPress += txtTextoSoloLetras_KeyPress;
             txtEspecie.KeyPress += txtTextoSoloLetras_KeyPress;
             numPeso.KeyPress += txtNumeroDecimal_KeyPress;
 
-            // Validaciones de enfoque (Validating)
+            // Eventos de validación cuando se pierde el foco de la casilla
             txtNombre.Validating += txtCampoObligatorio_Validating;
             txtEspecie.Validating += txtCampoObligatorio_Validating;
             numPeso.Validating += numPeso_Validating;
         }
 
-        #region EVENTOS KEYPRESS
+        #region ESTRUCTURA Y CONTROLES DE LA PILA (ACTIVIDAD 2.5)
+
+        private void InicializarControlesPila()
+        {
+            // 1. Reducimos el ancho del selector de fecha a formato corto para que no se extienda horizontalmente
+            if (dtpFechaRegistro != null)
+            {
+                dtpFechaRegistro.Format = DateTimePickerFormat.Short;
+                dtpFechaRegistro.Width = 140;
+            }
+
+            // 2. Ajustamos la ventana a 920px de ancho para dar margen suficiente
+            this.ClientSize = new Size(910, 500);
+            if (this.Width < 920) this.Width = 920;
+
+            // 3. Posicionamos el GroupBox a partir de X = 540 libre de cualquier traslape
+            grpPila.Text = " Control Histórico (Pila LIFO) ";
+            grpPila.Location = new Point(540, 75);
+            grpPila.Size = new Size(330, 380);
+            this.Controls.Add(grpPila);
+
+            // Texto indicador
+            Label lblInstruccion = new Label();
+            lblInstruccion.Text = "Estado a registrar:";
+            lblInstruccion.Location = new Point(20, 25);
+            lblInstruccion.AutoSize = true;
+            grpPila.Controls.Add(lblInstruccion);
+
+            // Caja de texto donde ingresamos el nuevo estado
+            this.txtEstado.Location = new Point(20, 45);
+            this.txtEstado.Size = new Size(290, 22);
+            grpPila.Controls.Add(this.txtEstado);
+
+            // Botón para hacer Push (apilar estado)
+            this.btnRegistrarEstado.Text = "Registrar Estado";
+            this.btnRegistrarEstado.Location = new Point(20, 80);
+            this.btnRegistrarEstado.Size = new Size(135, 30);
+            this.btnRegistrarEstado.Click += new EventHandler(this.btnRegistrarEstado_Click);
+            grpPila.Controls.Add(this.btnRegistrarEstado);
+
+            // Botón para hacer Pop (desapilar o deshacer acción)
+            this.btnDeshacer.Text = "Deshacer Último";
+            this.btnDeshacer.Location = new Point(175, 80);
+            this.btnDeshacer.Size = new Size(135, 30);
+            this.btnDeshacer.Click += new EventHandler(this.btnDeshacer_Click);
+            grpPila.Controls.Add(this.btnDeshacer);
+
+            // ListBox para ir monitoreando los elementos guardados en la pila
+            this.lstHistorial.Location = new Point(20, 125);
+            this.lstHistorial.Size = new Size(290, 190);
+            grpPila.Controls.Add(this.lstHistorial);
+
+            // Label para mostrar el dato en la cima (Peek)
+            this.lblCima.Text = "Cima: (vacía)";
+            this.lblCima.Location = new Point(20, 330);
+            this.lblCima.AutoSize = true;
+            this.lblCima.Font = new Font(this.lblCima.Font, FontStyle.Bold);
+            grpPila.Controls.Add(this.lblCima);
+        }
+
+        // Clic en Registrar Estado: inserta el texto en la cima de la pila
+        private void btnRegistrarEstado_Click(object? sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtEstado.Text))
+            {
+                return;
+            }
+
+            // Llamamos al método Push del modelo
+            historialPila.Push(txtEstado.Text.Trim());
+            txtEstado.Clear();
+            ActualizarInterfaz();
+        }
+
+        // Clic en Deshacer Último: retira el elemento más reciente
+        private void btnDeshacer_Click(object? sender, EventArgs e)
+        {
+            // Llamamos al método Pop del modelo
+            historialPila.Pop();
+            ActualizarInterfaz();
+        }
+
+        // Método auxiliar para actualizar la lista visual y validar el estado del botón Deshacer
+        private void ActualizarInterfaz()
+        {
+            lstHistorial.Items.Clear();
+
+            // Volcamos la pila a una lista copia para vaciar los datos en el ListBox sin modificar la pila original
+            List<string> lista = historialPila.VolcarArreglo();
+            foreach (string item in lista)
+            {
+                lstHistorial.Items.Add(item);
+            }
+
+            // Cumplimiento del punto 4: si no hay elementos en la pila, desactivamos el botón para evitar excepciones
+            if (historialPila.Count() == 0)
+            {
+                btnDeshacer.Enabled = false;
+                lblCima.Text = "Cima: (vacía)";
+            }
+            else
+            {
+                btnDeshacer.Enabled = true;
+                // Usamos Peek() para leer el elemento superior sin sacarlo
+                lblCima.Text = "Cima: " + historialPila.Peek();
+            }
+        }
+
+        #endregion
+
+        #region FILTROS DE TECLADO Y VALIDACIONES
 
         private void txtTextoSoloLetras_KeyPress(object? sender, KeyPressEventArgs e)
         {
+            // Bloqueamos teclas que no sean letras, espacio o teclas de control (como borrar)
             if (!char.IsLetter(e.KeyChar) && !char.IsControl(e.KeyChar) && e.KeyChar != ' ')
             {
                 e.Handled = true;
@@ -58,6 +181,7 @@ namespace SistemaRescateAnimalUI
         {
             TextBox? txt = sender as TextBox;
 
+            // Solo permitimos dígitos y un solo punto decimal
             if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar))
             {
                 if (e.KeyChar == '.' && txt != null && !txt.Text.Contains('.'))
@@ -71,10 +195,6 @@ namespace SistemaRescateAnimalUI
                 }
             }
         }
-
-        #endregion
-
-        #region EVENTOS VALIDATING
 
         private void txtCampoObligatorio_Validating(object? sender, CancelEventArgs e)
         {
@@ -108,7 +228,7 @@ namespace SistemaRescateAnimalUI
 
         #endregion
 
-        #region OPERACIONES CRUD Y GUARDADO
+        #region FUNCIONES CRUD DEL FORMULARIO
 
         public void EjecutarGuardar()
         {
@@ -142,8 +262,6 @@ namespace SistemaRescateAnimalUI
                 };
 
                 _modeloAnimal.InsertarRegistro(animal);
-
-                // Asignamos el ID directamente al control para que no quede vacío si queremos eliminar de inmediato
                 txtId.Text = idFinal;
 
                 MessageBox.Show($"Animal '{animal.Nombre}' guardado correctamente con ID: {animal.Id}",
@@ -159,7 +277,6 @@ namespace SistemaRescateAnimalUI
 
         public void EjecutarBuscar(string id, ErrorProvider alerta)
         {
-            // Posicionar el icono del ErrorProvider a la izquierda
             errorProvider1.SetIconAlignment(txtId, ErrorIconAlignment.MiddleLeft);
             errorProvider1.SetIconPadding(txtId, 5);
 
@@ -171,7 +288,6 @@ namespace SistemaRescateAnimalUI
             }
             errorProvider1.SetError(txtId, "");
 
-            // 1. Validar que no esté vacío
             if (string.IsNullOrWhiteSpace(id))
             {
                 string msjVacio = "Ingrese un ID válido para buscar.";
@@ -181,7 +297,6 @@ namespace SistemaRescateAnimalUI
                 return;
             }
 
-            // 2. Validar caracteres especiales
             foreach (char c in id)
             {
                 if (!char.IsLetterOrDigit(c))
@@ -198,7 +313,6 @@ namespace SistemaRescateAnimalUI
                 }
             }
 
-            // 3. Consultar en el modelo
             var resultado = _modeloAnimal.ConsultarRegistro(id) as AnimalRescatado;
 
             if (resultado != null)
@@ -264,7 +378,6 @@ namespace SistemaRescateAnimalUI
                     return;
                 }
 
-                // Pregunta obligatoria con MessageBox.Show y evaluación de DialogResult (Requisito A3.3)
                 DialogResult respuesta = MessageBox.Show(
                     $"¿Está seguro de que desea eliminar el registro con ID '{idAEliminar}'?",
                     "Confirmación de Eliminación",
@@ -272,7 +385,6 @@ namespace SistemaRescateAnimalUI
                     MessageBoxIcon.Question
                 );
 
-                // Si selecciona No, aborta inmediatamente el proceso sin borrar nada
                 if (respuesta == DialogResult.No)
                 {
                     return;
@@ -298,7 +410,6 @@ namespace SistemaRescateAnimalUI
             }
         }
 
-        // Exportación de datos utilizando SaveFileDialog con filtros (Requisito A3.3)
         public void ExportarExpedienteTXT()
         {
             if (string.IsNullOrWhiteSpace(txtId.Text))
@@ -314,7 +425,6 @@ namespace SistemaRescateAnimalUI
                 saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                 saveFileDialog.FileName = $"Expediente_{txtId.Text}.txt";
 
-                // Evaluamos que el usuario haya hecho clic en Guardar
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     string datos = $"EXPEDIENTE DE ANIMAL RESCATADO\n" +
@@ -345,10 +455,8 @@ namespace SistemaRescateAnimalUI
 
         #endregion
 
-        #region EVENTO LOAD
         private void FrmAnimalRescatado_Load(object sender, EventArgs e)
         {
         }
-        #endregion
     }
 }
