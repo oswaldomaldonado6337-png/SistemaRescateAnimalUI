@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Media;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using SistemaRescateAnimal.Models;
 
@@ -33,13 +35,22 @@ namespace SistemaRescateAnimalUI
         private ListBox lstHistorial = new ListBox();
         private Label lblCima = new Label();
 
+        // Controles que agregamos dinámicamente para Concurrencia e Hilos (Actividad 3.4)
+        private GroupBox grpConcurrencia = new GroupBox();
+        private ProgressBar pgbReporte = new ProgressBar();
+        private Button btnGenerarReporte = new Button();
+        private Button btnCancelarReporte = new Button();
+        private Label lblEstadoReporte = new Label();
+        private CancellationTokenSource cts;
+
         public FrmAnimalRescatado()
         {
             InitializeComponent();
             ConfigurarValidaciones();
 
-            // Al arrancar el formulario creamos la sección de la pila a la derecha y refrescamos los controles
+            // Al arrancar el formulario creamos la sección de la pila y concurrencia
             InicializarControlesPila();
+            InicializarControlesConcurrencia();
             ActualizarInterfaz();
         }
 
@@ -67,14 +78,14 @@ namespace SistemaRescateAnimalUI
                 dtpFechaRegistro.Width = 140;
             }
 
-            // 2. Ajustamos la ventana a 920px de ancho para dar margen suficiente
-            this.ClientSize = new Size(910, 500);
+            // 2. Ajustamos la ventana para dar margen a la Pila y a la Concurrencia
+            this.ClientSize = new Size(910, 540);
             if (this.Width < 920) this.Width = 920;
 
             // 3. Posicionamos el GroupBox a partir de X = 540 libre de cualquier traslape
             grpPila.Text = " Control Histórico (Pila LIFO) ";
             grpPila.Location = new Point(540, 75);
-            grpPila.Size = new Size(330, 380);
+            grpPila.Size = new Size(330, 420);
             this.Controls.Add(grpPila);
 
             // Texto indicador
@@ -105,12 +116,12 @@ namespace SistemaRescateAnimalUI
 
             // ListBox para ir monitoreando los elementos guardados en la pila
             this.lstHistorial.Location = new Point(20, 125);
-            this.lstHistorial.Size = new Size(290, 190);
+            this.lstHistorial.Size = new Size(290, 230);
             grpPila.Controls.Add(this.lstHistorial);
 
             // Label para mostrar el dato en la cima (Peek)
             this.lblCima.Text = "Cima: (vacía)";
-            this.lblCima.Location = new Point(20, 330);
+            this.lblCima.Location = new Point(20, 370);
             this.lblCima.AutoSize = true;
             this.lblCima.Font = new Font(this.lblCima.Font, FontStyle.Bold);
             grpPila.Controls.Add(this.lblCima);
@@ -161,6 +172,140 @@ namespace SistemaRescateAnimalUI
                 btnDeshacer.Enabled = true;
                 // Usamos Peek() para leer el elemento superior sin sacarlo
                 lblCima.Text = "Cima: " + historialPila.Peek();
+            }
+        }
+
+        #endregion
+
+        #region CONCURRENCIA E HILOS EN SEGUNDO PLANO (ACTIVIDAD 3.4)
+
+        private void InicializarControlesConcurrencia()
+        {
+            // Panel inferior para procesos asíncronos
+            grpConcurrencia.Text = " Procesamiento Asíncrono (Task / Concurrencia) ";
+            grpConcurrencia.Location = new Point(20, 350);
+            grpConcurrencia.Size = new Size(500, 145);
+            this.Controls.Add(grpConcurrencia);
+
+            // Botón para iniciar el proceso pesado en segundo plano
+            btnGenerarReporte.Text = "Procesar Reporte Async";
+            btnGenerarReporte.Location = new Point(15, 25);
+            btnGenerarReporte.Size = new Size(180, 30);
+            btnGenerarReporte.Click += async (s, e) => await IniciarProcesoAsincronoAsync();
+            grpConcurrencia.Controls.Add(btnGenerarReporte);
+
+            // Botón para cancelar el hilo mediante CancellationTokenSource
+            btnCancelarReporte.Text = "Cancelar";
+            btnCancelarReporte.Location = new Point(205, 25);
+            btnCancelarReporte.Size = new Size(100, 30);
+            btnCancelarReporte.Enabled = false;
+            btnCancelarReporte.Click += (s, e) => CancelarProcesoHilo();
+            grpConcurrencia.Controls.Add(btnCancelarReporte);
+
+            // Barra de Progreso
+            pgbReporte.Location = new Point(15, 65);
+            pgbReporte.Size = new Size(465, 23);
+            pgbReporte.Minimum = 0;
+            pgbReporte.Maximum = 100;
+            grpConcurrencia.Controls.Add(pgbReporte);
+
+            // Estado del Hilo
+            lblEstadoReporte.Text = "Estado: En espera de iniciar proceso.";
+            lblEstadoReporte.Location = new Point(15, 100);
+            lblEstadoReporte.AutoSize = true;
+            grpConcurrencia.Controls.Add(lblEstadoReporte);
+        }
+
+        private async Task IniciarProcesoAsincronoAsync()
+        {
+            cts = new CancellationTokenSource();
+            btnGenerarReporte.Enabled = false;
+            btnCancelarReporte.Enabled = true;
+            pgbReporte.Value = 0;
+            lblEstadoReporte.Text = "Estado: Procesando datos en hilo secundario (Task.Run)...";
+
+            bool cancelado = false;
+
+            try
+            {
+                // Tarea ejecutada en segundo plano para no congelar la UI
+                await Task.Run(() =>
+                {
+                    for (int i = 1; i <= 100; i++)
+                    {
+                        // 1. Verificación limpia de cancelación (evita que el depurador se pause)
+                        if (cts.Token.IsCancellationRequested)
+                        {
+                            cancelado = true;
+                            break;
+                        }
+
+                        // Simulación de carga diferida
+                        Thread.Sleep(40);
+
+                        int progreso = i;
+
+                        // 2. Verificación de vida de la ventana (evita ObjectDisposedException al cerrar)
+                        if (this.IsDisposed || !this.IsHandleCreated)
+                        {
+                            return;
+                        }
+
+                        try
+                        {
+                            this.Invoke(new Action(() =>
+                            {
+                                if (!pgbReporte.IsDisposed)
+                                {
+                                    pgbReporte.Value = progreso;
+                                }
+                            }));
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            // Manejo seguro si la ventana se cerró durante el Invoke
+                            return;
+                        }
+                    }
+                });
+
+                // Evaluación final fuera del hilo secundario
+                if (cancelado)
+                {
+                    if (!this.IsDisposed)
+                    {
+                        lblEstadoReporte.Text = "Estado: Proceso cancelado por el usuario.";
+                        pgbReporte.Value = 0;
+                    }
+                }
+                else if (!this.IsDisposed)
+                {
+                    lblEstadoReporte.Text = "Estado: ¡Reporte generado exitosamente!";
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!this.IsDisposed)
+                {
+                    lblEstadoReporte.Text = $"Estado: Error en hilo - {ex.Message}";
+                }
+            }
+            finally
+            {
+                if (!this.IsDisposed)
+                {
+                    btnGenerarReporte.Enabled = true;
+                    btnCancelarReporte.Enabled = false;
+                }
+                cts.Dispose();
+            }
+        }
+
+        private void CancelarProcesoHilo()
+        {
+            if (cts != null && !cts.IsCancellationRequested)
+            {
+                cts.Cancel();
             }
         }
 
@@ -274,7 +419,7 @@ namespace SistemaRescateAnimalUI
                                 "Sistema", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 errorProvider1.Clear();
-                LimpiarFormulario(); // <--- LIMPIEZA AUTOMÁTICA AGREGADA
+                LimpiarFormulario();
             }
             catch (Exception ex)
             {
@@ -366,7 +511,7 @@ namespace SistemaRescateAnimalUI
 
                 _modeloAnimal.ActualizarRegistro(animal);
                 MessageBox.Show("Registro actualizado correctamente.", "Sistema", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LimpiarFormulario(); // También agregamos limpieza aquí por comodidad
+                LimpiarFormulario();
             }
             catch (Exception ex)
             {
