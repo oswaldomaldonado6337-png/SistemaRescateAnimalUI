@@ -1,10 +1,10 @@
 ﻿// ============================================================================
 // INTEGRANTES - EQUIPO 5:
-// - FLORES MONTANO, Carlos Roberto
+// - FLORES MONTANO,  Roberto Carlos
 // - GONZALEZ ALVARADO, Alexa Michelle
 // - MALDONADO LLAMAS, Oswaldo Daniel
 // ============================================================================
-
+using System.IO;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -23,12 +23,15 @@ namespace SistemaRescateAnimalUI
         private static AnimalRescatado _modeloAnimal = new AnimalRescatado();
         private static int _contadorId = 101;
         private ErrorProvider errorProvider1 = new ErrorProvider();
+        private string rutaImagenTemporal = "";
 
         // Objeto de nuestra clase de la Pila (Actividad 2.5)
         private AnimalHistorial historialPila = new AnimalHistorial();
 
         // Controles que agregamos dinámicamente para la interfaz de la Pila
         private GroupBox grpPila = new GroupBox();
+        // Control dinámico para la Imagen
+        private PictureBox pbxFotografia = new PictureBox();
         private TextBox txtEstado = new TextBox();
         private Button btnRegistrarEstado = new Button();
         private Button btnDeshacer = new Button();
@@ -51,6 +54,7 @@ namespace SistemaRescateAnimalUI
             // Al arrancar el formulario creamos la sección de la pila y concurrencia
             InicializarControlesPila();
             InicializarControlesConcurrencia();
+            InicializarControlImagen();
             ActualizarInterfaz();
         }
 
@@ -214,6 +218,16 @@ namespace SistemaRescateAnimalUI
             lblEstadoReporte.Location = new Point(15, 100);
             lblEstadoReporte.AutoSize = true;
             grpConcurrencia.Controls.Add(lblEstadoReporte);
+        }
+        private void InicializarControlImagen()
+        {
+            // Ajusta Location y Size según el espacio libre en tu formulario
+            this.pbxFotografia.Location = new Point(350, 75);
+            this.pbxFotografia.Size = new Size(150, 150);
+            this.pbxFotografia.SizeMode = PictureBoxSizeMode.Zoom; // Para que la foto no se deforme
+            this.pbxFotografia.BorderStyle = BorderStyle.FixedSingle;
+
+            this.Controls.Add(this.pbxFotografia);
         }
 
         private async Task IniciarProcesoAsincronoAsync()
@@ -388,14 +402,28 @@ namespace SistemaRescateAnimalUI
 
             if (tieneErrores)
             {
-                MessageBox.Show("No se puede guardar. Existen datos incompletos o inválidos marcados en la pantalla.",
-                                "Error de validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("No se puede guardar. Existen datos incompletos o inválidos.", "Error de validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             try
             {
                 string idFinal = string.IsNullOrWhiteSpace(txtIdBusqueda.Text) ? _contadorId.ToString() : txtIdBusqueda.Text;
+                string nombreArchivoFinal = "";
+
+                if (!string.IsNullOrEmpty(rutaImagenTemporal))
+                {
+                    string rutaBase = AppDomain.CurrentDomain.BaseDirectory;
+                    string carpetaDestino = Path.Combine(rutaBase, "ImagenesDatos");
+
+                    if (!Directory.Exists(carpetaDestino)) Directory.CreateDirectory(carpetaDestino);
+
+                    string extension = Path.GetExtension(rutaImagenTemporal);
+                    nombreArchivoFinal = Guid.NewGuid().ToString() + extension;
+                    string rutaFinalCompleta = Path.Combine(carpetaDestino, nombreArchivoFinal);
+
+                    File.Copy(rutaImagenTemporal, rutaFinalCompleta, true);
+                }
 
                 AnimalRescatado animal = new AnimalRescatado
                 {
@@ -404,22 +432,26 @@ namespace SistemaRescateAnimalUI
                     Especie = txtEspecie.Text.Trim(),
                     Peso = double.TryParse(numPeso.Text, out double p) ? p : 0.0,
                     FechaRegistro = dtpFechaRegistro.Value,
-                    EsActivo = chkEsActivo.Checked
+                    EsActivo = chkEsActivo.Checked,
+                    RutaImagen = nombreArchivoFinal
                 };
 
                 _modeloAnimal.InsertarRegistro(animal);
                 txtIdBusqueda.Text = idFinal;
 
-                if (idFinal == _contadorId.ToString())
-                {
-                    _contadorId++;
-                }
+                if (idFinal == _contadorId.ToString()) _contadorId++;
 
-                MessageBox.Show($"Animal '{animal.Nombre}' guardado correctamente con ID: {animal.Id}",
-                                "Sistema", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"Animal '{animal.Nombre}' guardado correctamente con ID: {animal.Id}", "Sistema", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 errorProvider1.Clear();
                 LimpiarFormulario();
+
+                // Si pbxFotografia arroja error aquí, asegúrate de que el PictureBox se llame pbxFotografia en el Diseñador.
+                if (pbxFotografia != null)
+                {
+                    pbxFotografia.Image = null;
+                }
+                rutaImagenTemporal = "";
             }
             catch (Exception ex)
             {
@@ -630,6 +662,21 @@ namespace SistemaRescateAnimalUI
         private void btnMasterEliminar_Click(object sender, EventArgs e)
         {
             EjecutarEliminar(null);
+        }
+
+        private void btnCargarImagen_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dialog = new OpenFileDialog())
+            {
+                dialog.Filter = "Archivos de imagen|*.jpg;*.jpeg;*.png";
+
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    rutaImagenTemporal = dialog.FileName;
+                    // Asegúrate de que el control PictureBox en tu formulario se llame pbxFotografia
+                    pbxFotografia.Image = Image.FromFile(rutaImagenTemporal);
+                }
+            }
         }
     }
 }

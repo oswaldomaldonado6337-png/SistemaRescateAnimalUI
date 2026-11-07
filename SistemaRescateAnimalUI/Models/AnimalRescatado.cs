@@ -1,12 +1,11 @@
 ﻿/*
- * ASIGNATURA: Programación Orientada a Eventos
- * EQUIPO: 4
- * INTEGRANTES:
- * - FLORES MONTAÑO, Roberto Carlos
- * - GONZALEZ ALVARADO, Alexa Michelle
- * - MALDONADO LLAMAS, Oswaldo Daniel
+- ASIGNATURA: Programación Orientada a Eventos
+- EQUIPO: 4
+- INTEGRANTES:
+- FLORES MONTAÑO, Roberto Carlos
+- GONZALEZ ALVARADO, Alexa Michelle
+- MALDONADO LLAMAS, Oswaldo Daniel
  */
-
 using System;
 using System.Collections.Generic;
 
@@ -19,6 +18,8 @@ namespace SistemaRescateAnimal.Models
         public string Nombre { get; set; } = string.Empty;
         public string Especie { get; set; } = string.Empty;
         public double Peso { get; set; }
+
+        public string RutaImagen { get; set; } = string.Empty;
 
         private Stack<string> _historialCambios;
 
@@ -33,8 +34,6 @@ namespace SistemaRescateAnimal.Models
         {
             get { return _colaAtencion; }
         }
-
-        
 
         public AnimalRescatado() : base()
         {
@@ -55,8 +54,6 @@ namespace SistemaRescateAnimal.Models
             _historialCambios = new Stack<string>();
             _colaAtencion = new Queue<string>();
         }
-
-        
 
         public void ApilarEstado(string estado)
         {
@@ -118,8 +115,6 @@ namespace SistemaRescateAnimal.Models
             return copia;
         }
 
-        
-
         public void EncolarTurno(string turno)
         {
             if (!string.IsNullOrEmpty(turno))
@@ -176,7 +171,6 @@ namespace SistemaRescateAnimal.Models
             _colaAtencion.CopyTo(arreglo, 0);
             return arreglo;
         }
-
 
         public void InsertarRegistro(object objeto)
         {

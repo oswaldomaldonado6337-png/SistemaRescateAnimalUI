@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SistemaRescateAnimalUI.Models
 {
-    internal class Usuario
+    public class Usuario
     {
         // El número único para identificar a cada usuario en el sistema (como su número de empleado)
         public int IdUsuario { get; set; }
@@ -14,6 +14,9 @@ namespace SistemaRescateAnimalUI.Models
 
         // La clave para entrar (por ahora en texto, pero luego podríamos protegerla)
         public string Contrasena { get; set; }
+
+        // 2. Agregué el Nombre Completo para poder mostrarlo en la barra inferior del sistema
+        public string NombreCompleto { get; set; }
 
         // Aquí definimos si es "Administrador" o "Voluntario" para saber a qué pantallas dejarlo entrar
         public string Rol { get; set; }
