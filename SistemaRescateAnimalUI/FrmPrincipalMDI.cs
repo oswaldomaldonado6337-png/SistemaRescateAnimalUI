@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using SistemaRescateAnimalUI.Models;
 
 namespace SistemaRescateAnimalUI
 {
@@ -37,7 +38,6 @@ namespace SistemaRescateAnimalUI
             this.LayoutMdi(MdiLayout.TileHorizontal);
         }
 
-        // En caso de que el diseñador vincule la versión con sufijo '1'
         private void cascadaToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             this.LayoutMdi(MdiLayout.Cascade);
@@ -58,27 +58,19 @@ namespace SistemaRescateAnimalUI
         // ============================================================================
         private void gestiónDeAnimalesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // 1. Recorremos la colección de ventanas secundarias abiertas
             foreach (Form hijo in this.MdiChildren)
             {
-                // 2. Evaluamos si el tipo del formulario ya existe
                 if (hijo is FrmAnimalRescatado)
                 {
-                    // Restauramos si está minimizado
                     if (hijo.WindowState == FormWindowState.Minimized)
                     {
                         hijo.WindowState = FormWindowState.Normal;
                     }
-
-                    // Enfocamos la ventana existente
                     hijo.Activate();
-
-                    // Abortamos la creación de duplicados
                     return;
                 }
             }
 
-            // 3. Si no existe, creamos la nueva instancia en el contenedor
             FrmAnimalRescatado frmAnimal = new FrmAnimalRescatado();
             frmAnimal.MdiParent = this;
             frmAnimal.Show();
@@ -101,6 +93,32 @@ namespace SistemaRescateAnimalUI
             Form1 f1 = new Form1();
             f1.MdiParent = this;
             f1.Show();
+        }
+
+        private void módulosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        // EVENTO DE ARRANQUE (CARGA DE SESIÓN Y SEGURIDAD POR ROLES)
+        private void FrmPrincipalMDI_Load(object sender, EventArgs e)
+        {
+            // 1. Cargamos datos de la sesión estática en el StatusStrip
+            lblUsuario.Text = "Usuario: " + SesionSistema.UsuarioActivo;
+            lblRol.Text = "Perfil: " + SesionSistema.RolActivo;
+            lblHora.Text = "Conexión: " + SesionSistema.HoraInicioSesion.ToString("HH:mm:ss");
+
+            // 2. Evaluamos el rol del usuario autenticado para restringir accesos
+            if (SesionSistema.RolActivo == "Operador")
+            {
+                // El Operador no puede ver el Módulo Secundario
+                móduloSecundarioToolStripMenuItem.Visible = false;
+            }
+            else if (SesionSistema.RolActivo == "Invitado")
+            {
+                // El Invitado no tiene acceso a las opciones del menú Módulos
+                módulosToolStripMenuItem.Enabled = false;
+            }
         }
     }
 }

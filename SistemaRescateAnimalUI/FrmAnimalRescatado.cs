@@ -1,6 +1,6 @@
 ﻿// ============================================================================
 // INTEGRANTES - EQUIPO 5:
-// - FLORES MONTANO,  Roberto Carlos
+// - FLORES MONTANO, Roberto Carlos
 // - GONZALEZ ALVARADO, Alexa Michelle
 // - MALDONADO LLAMAS, Oswaldo Daniel
 // ============================================================================
@@ -19,26 +19,25 @@ namespace SistemaRescateAnimalUI
 {
     public partial class FrmAnimalRescatado : FrmBase, IPanelCRUD
     {
-        // Instancia principal del modelo para conservar registros en memoria RAM
         private static AnimalRescatado _modeloAnimal = new AnimalRescatado();
         private static int _contadorId = 101;
         private ErrorProvider errorProvider1 = new ErrorProvider();
         private string rutaImagenTemporal = "";
 
-        // Objeto de nuestra clase de la Pila (Actividad 2.5)
+        // Estructura de datos Pila (Actividad 2.5)
         private AnimalHistorial historialPila = new AnimalHistorial();
 
-        // Controles que agregamos dinámicamente para la interfaz de la Pila
+        // Componentes para la interfaz del historial
         private GroupBox grpPila = new GroupBox();
-        // Control dinámico para la Imagen
         private PictureBox pbxFotografia = new PictureBox();
+        private Button btnCargarImagen = new Button();
         private TextBox txtEstado = new TextBox();
         private Button btnRegistrarEstado = new Button();
         private Button btnDeshacer = new Button();
         private ListBox lstHistorial = new ListBox();
         private Label lblCima = new Label();
 
-        // Controles que agregamos dinámicamente para Concurrencia e Hilos (Actividad 3.4)
+        // Componentes para el procesamiento asíncrono (Actividad 3.4)
         private GroupBox grpConcurrencia = new GroupBox();
         private ProgressBar pgbReporte = new ProgressBar();
         private Button btnGenerarReporte = new Button();
@@ -51,7 +50,6 @@ namespace SistemaRescateAnimalUI
             InitializeComponent();
             ConfigurarValidaciones();
 
-            // Al arrancar el formulario creamos la sección de la pila y concurrencia
             InicializarControlesPila();
             InicializarControlesConcurrencia();
             InicializarControlImagen();
@@ -60,70 +58,60 @@ namespace SistemaRescateAnimalUI
 
         private void ConfigurarValidaciones()
         {
-            // Eventos KeyPress para evitar que escriban caracteres raros en los textos
             txtNombre.KeyPress += txtTextoSoloLetras_KeyPress;
             txtEspecie.KeyPress += txtTextoSoloLetras_KeyPress;
             numPeso.KeyPress += txtNumeroDecimal_KeyPress;
 
-            // Eventos de validación cuando se pierde el foco de la casilla
             txtNombre.Validating += txtCampoObligatorio_Validating;
             txtEspecie.Validating += txtCampoObligatorio_Validating;
             numPeso.Validating += numPeso_Validating;
         }
 
-        #region ESTRUCTURA Y CONTROLES DE LA PILA (ACTIVIDAD 2.5)
+        #region HISTORIAL Y PILA LIFO (ACTIVIDAD 2.5)
 
         private void InicializarControlesPila()
         {
-            // 1. Reducimos el ancho del selector de fecha a formato corto para que no se extienda horizontalmente
             if (dtpFechaRegistro != null)
             {
                 dtpFechaRegistro.Format = DateTimePickerFormat.Short;
                 dtpFechaRegistro.Width = 140;
             }
 
-            // 2. Ajustamos la ventana para dar margen a la Pila y a la Concurrencia
-            this.ClientSize = new Size(910, 540);
-            if (this.Width < 920) this.Width = 920;
+            // Ajuste del formulario para dar cabida a Pila, Concurrencia e Imagen
+            this.ClientSize = new Size(1120, 540);
+            if (this.Width < 1120) this.Width = 1120;
 
-            // 3. Posicionamos el GroupBox a partir de X = 540 libre de cualquier traslape
             grpPila.Text = " Control Histórico (Pila LIFO) ";
             grpPila.Location = new Point(540, 75);
             grpPila.Size = new Size(330, 420);
             this.Controls.Add(grpPila);
 
-            // Texto indicador
             Label lblInstruccion = new Label();
             lblInstruccion.Text = "Estado a registrar:";
             lblInstruccion.Location = new Point(20, 25);
             lblInstruccion.AutoSize = true;
             grpPila.Controls.Add(lblInstruccion);
 
-            // Caja de texto donde ingresamos el nuevo estado
             this.txtEstado.Location = new Point(20, 45);
             this.txtEstado.Size = new Size(290, 22);
             grpPila.Controls.Add(this.txtEstado);
 
-            // Botón para hacer Push (apilar estado)
             this.btnRegistrarEstado.Text = "Registrar Estado";
             this.btnRegistrarEstado.Location = new Point(20, 80);
             this.btnRegistrarEstado.Size = new Size(135, 30);
             this.btnRegistrarEstado.Click += new EventHandler(this.btnRegistrarEstado_Click);
             grpPila.Controls.Add(this.btnRegistrarEstado);
 
-            // Botón para hacer Pop (desapilar o deshacer acción)
             this.btnDeshacer.Text = "Deshacer Último";
             this.btnDeshacer.Location = new Point(175, 80);
             this.btnDeshacer.Size = new Size(135, 30);
             this.btnDeshacer.Click += new EventHandler(this.btnDeshacer_Click);
             grpPila.Controls.Add(this.btnDeshacer);
 
-            // ListBox para ir monitoreando los elementos guardados en la pila
             this.lstHistorial.Location = new Point(20, 125);
             this.lstHistorial.Size = new Size(290, 230);
             grpPila.Controls.Add(this.lstHistorial);
 
-            // Label para mostrar el dato en la cima (Peek)
             this.lblCima.Text = "Cima: (vacía)";
             this.lblCima.Location = new Point(20, 370);
             this.lblCima.AutoSize = true;
@@ -131,7 +119,6 @@ namespace SistemaRescateAnimalUI
             grpPila.Controls.Add(this.lblCima);
         }
 
-        // Clic en Registrar Estado: inserta el texto en la cima de la pila
         private void btnRegistrarEstado_Click(object? sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtEstado.Text))
@@ -139,33 +126,27 @@ namespace SistemaRescateAnimalUI
                 return;
             }
 
-            // Llamamos al método Push del modelo
             historialPila.Push(txtEstado.Text.Trim());
             txtEstado.Clear();
             ActualizarInterfaz();
         }
 
-        // Clic en Deshacer Último: retira el elemento más reciente
         private void btnDeshacer_Click(object? sender, EventArgs e)
         {
-            // Llamamos al método Pop del modelo
             historialPila.Pop();
             ActualizarInterfaz();
         }
 
-        // Método auxiliar para actualizar la lista visual y validar el estado del botón Deshacer
         private void ActualizarInterfaz()
         {
             lstHistorial.Items.Clear();
 
-            // Volcamos la pila a una lista copia para vaciar los datos en el ListBox sin modificar la pila original
             List<string> lista = historialPila.VolcarArreglo();
             foreach (string item in lista)
             {
                 lstHistorial.Items.Add(item);
             }
 
-            // Cumplimiento del punto 4: si no hay elementos en la pila, desactivamos el botón para evitar excepciones
             if (historialPila.Count() == 0)
             {
                 btnDeshacer.Enabled = false;
@@ -174,31 +155,62 @@ namespace SistemaRescateAnimalUI
             else
             {
                 btnDeshacer.Enabled = true;
-                // Usamos Peek() para leer el elemento superior sin sacarlo
                 lblCima.Text = "Cima: " + historialPila.Peek();
             }
         }
 
         #endregion
 
-        #region CONCURRENCIA E HILOS EN SEGUNDO PLANO (ACTIVIDAD 3.4)
+        #region MULTIMEDIA Y MANEJO DE ARCHIVOS (ACTIVIDAD 3.6)
+
+        private void InicializarControlImagen()
+        {
+            // Posicionamiento del PictureBox y el botón Cargar a la derecha de la Pila
+            this.pbxFotografia.Location = new Point(895, 85);
+            this.pbxFotografia.Size = new Size(195, 185);
+            this.pbxFotografia.SizeMode = PictureBoxSizeMode.StretchImage;
+            this.pbxFotografia.BorderStyle = BorderStyle.FixedSingle;
+            this.Controls.Add(this.pbxFotografia);
+
+            this.btnCargarImagen.Text = "Cargar Imagen";
+            this.btnCargarImagen.Location = new Point(895, 280);
+            this.btnCargarImagen.Size = new Size(195, 32);
+            this.btnCargarImagen.Click += new EventHandler(this.btnCargarImagen_Click);
+            this.Controls.Add(this.btnCargarImagen);
+        }
+
+        private void btnCargarImagen_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dialog = new OpenFileDialog())
+            {
+                dialog.Filter = "Archivos de imagen (.jpg, .png)|*.jpg;*.png";
+                dialog.Title = "Seleccionar fotografía del animal";
+
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    rutaImagenTemporal = dialog.FileName;
+                    pbxFotografia.Image = Image.FromFile(rutaImagenTemporal);
+                }
+            }
+        }
+
+        #endregion
+
+        #region PROCESAMIENTO ASÍNCRONO E HILOS (ACTIVIDAD 3.4)
 
         private void InicializarControlesConcurrencia()
         {
-            // Panel inferior para procesos asíncronos
             grpConcurrencia.Text = " Procesamiento Asíncrono (Task / Concurrencia) ";
             grpConcurrencia.Location = new Point(20, 350);
             grpConcurrencia.Size = new Size(500, 145);
             this.Controls.Add(grpConcurrencia);
 
-            // Botón para iniciar el proceso pesado en segundo plano
             btnGenerarReporte.Text = "Procesar Reporte Async";
             btnGenerarReporte.Location = new Point(15, 25);
             btnGenerarReporte.Size = new Size(180, 30);
             btnGenerarReporte.Click += async (s, e) => await IniciarProcesoAsincronoAsync();
             grpConcurrencia.Controls.Add(btnGenerarReporte);
 
-            // Botón para cancelar el hilo mediante CancellationTokenSource
             btnCancelarReporte.Text = "Cancelar";
             btnCancelarReporte.Location = new Point(205, 25);
             btnCancelarReporte.Size = new Size(100, 30);
@@ -206,28 +218,16 @@ namespace SistemaRescateAnimalUI
             btnCancelarReporte.Click += (s, e) => CancelarProcesoHilo();
             grpConcurrencia.Controls.Add(btnCancelarReporte);
 
-            // Barra de Progreso
             pgbReporte.Location = new Point(15, 65);
             pgbReporte.Size = new Size(465, 23);
             pgbReporte.Minimum = 0;
             pgbReporte.Maximum = 100;
             grpConcurrencia.Controls.Add(pgbReporte);
 
-            // Estado del Hilo
             lblEstadoReporte.Text = "Estado: En espera de iniciar proceso.";
             lblEstadoReporte.Location = new Point(15, 100);
             lblEstadoReporte.AutoSize = true;
             grpConcurrencia.Controls.Add(lblEstadoReporte);
-        }
-        private void InicializarControlImagen()
-        {
-            // Ajusta Location y Size según el espacio libre en tu formulario
-            this.pbxFotografia.Location = new Point(350, 75);
-            this.pbxFotografia.Size = new Size(150, 150);
-            this.pbxFotografia.SizeMode = PictureBoxSizeMode.Zoom; // Para que la foto no se deforme
-            this.pbxFotografia.BorderStyle = BorderStyle.FixedSingle;
-
-            this.Controls.Add(this.pbxFotografia);
         }
 
         private async Task IniciarProcesoAsincronoAsync()
@@ -242,24 +242,19 @@ namespace SistemaRescateAnimalUI
 
             try
             {
-                // Tarea ejecutada en segundo plano para no congelar la UI
                 await Task.Run(() =>
                 {
                     for (int i = 1; i <= 100; i++)
                     {
-                        // 1. Verificación limpia de cancelación (evita que el depurador se pause)
                         if (cts.Token.IsCancellationRequested)
                         {
                             cancelado = true;
                             break;
                         }
 
-                        // Simulación de carga diferida
                         Thread.Sleep(40);
-
                         int progreso = i;
 
-                        // 2. Verificación de vida de la ventana (evita ObjectDisposedException al cerrar)
                         if (this.IsDisposed || !this.IsHandleCreated)
                         {
                             return;
@@ -277,13 +272,11 @@ namespace SistemaRescateAnimalUI
                         }
                         catch (ObjectDisposedException)
                         {
-                            // Manejo seguro si la ventana se cerró durante el Invoke
                             return;
                         }
                     }
                 });
 
-                // Evaluación final fuera del hilo secundario
                 if (cancelado)
                 {
                     if (!this.IsDisposed)
@@ -325,11 +318,10 @@ namespace SistemaRescateAnimalUI
 
         #endregion
 
-        #region FILTROS DE TECLADO Y VALIDACIONES
+        #region VALIDACIONES DE ENTRADA
 
         private void txtTextoSoloLetras_KeyPress(object? sender, KeyPressEventArgs e)
         {
-            // Bloqueamos teclas que no sean letras, espacio o teclas de control (como borrar)
             if (!char.IsLetter(e.KeyChar) && !char.IsControl(e.KeyChar) && e.KeyChar != ' ')
             {
                 e.Handled = true;
@@ -341,7 +333,6 @@ namespace SistemaRescateAnimalUI
         {
             TextBox? txt = sender as TextBox;
 
-            // Solo permitimos dígitos y un solo punto decimal
             if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar))
             {
                 if (e.KeyChar == '.' && txt != null && !txt.Text.Contains('.'))
@@ -388,7 +379,7 @@ namespace SistemaRescateAnimalUI
 
         #endregion
 
-        #region FUNCIONES CRUD DEL FORMULARIO
+        #region OPERACIONES CRUD Y PERSISTENCIA
 
         public void EjecutarGuardar()
         {
@@ -406,17 +397,21 @@ namespace SistemaRescateAnimalUI
                 return;
             }
 
-            try
-            {
-                string idFinal = string.IsNullOrWhiteSpace(txtIdBusqueda.Text) ? _contadorId.ToString() : txtIdBusqueda.Text;
-                string nombreArchivoFinal = "";
+            string idFinal = string.IsNullOrWhiteSpace(txtIdBusqueda.Text) ? _contadorId.ToString() : txtIdBusqueda.Text;
+            string nombreArchivoFinal = "";
 
-                if (!string.IsNullOrEmpty(rutaImagenTemporal))
+            // Copia física de la imagen usando System.IO con manejo de excepciones
+            if (!string.IsNullOrEmpty(rutaImagenTemporal))
+            {
+                try
                 {
                     string rutaBase = AppDomain.CurrentDomain.BaseDirectory;
                     string carpetaDestino = Path.Combine(rutaBase, "ImagenesDatos");
 
-                    if (!Directory.Exists(carpetaDestino)) Directory.CreateDirectory(carpetaDestino);
+                    if (!Directory.Exists(carpetaDestino))
+                    {
+                        Directory.CreateDirectory(carpetaDestino);
+                    }
 
                     string extension = Path.GetExtension(rutaImagenTemporal);
                     nombreArchivoFinal = Guid.NewGuid().ToString() + extension;
@@ -424,7 +419,30 @@ namespace SistemaRescateAnimalUI
 
                     File.Copy(rutaImagenTemporal, rutaFinalCompleta, true);
                 }
+                catch (FileNotFoundException ex)
+                {
+                    MessageBox.Show($"El archivo de origen no fue encontrado: {ex.Message}", "Error de archivo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    MessageBox.Show($"Acceso denegado para escribir en el directorio: {ex.Message}", "Error de permisos", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show($"Error de entrada/salida al copiar la imagen: {ex.Message}", "Error de E/S", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error no esperado al procesar imagen: {ex.Message}", "Error de sistema", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
 
+            try
+            {
                 AnimalRescatado animal = new AnimalRescatado
                 {
                     Id = idFinal,
@@ -446,7 +464,6 @@ namespace SistemaRescateAnimalUI
                 errorProvider1.Clear();
                 LimpiarFormulario();
 
-                // Si pbxFotografia arroja error aquí, asegúrate de que el PictureBox se llame pbxFotografia en el Diseñador.
                 if (pbxFotografia != null)
                 {
                     pbxFotografia.Image = null;
@@ -455,7 +472,7 @@ namespace SistemaRescateAnimalUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al guardar: {ex.Message}", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Error al guardar el registro: {ex.Message}", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -662,21 +679,6 @@ namespace SistemaRescateAnimalUI
         private void btnMasterEliminar_Click(object sender, EventArgs e)
         {
             EjecutarEliminar(null);
-        }
-
-        private void btnCargarImagen_Click(object sender, EventArgs e)
-        {
-            using (OpenFileDialog dialog = new OpenFileDialog())
-            {
-                dialog.Filter = "Archivos de imagen|*.jpg;*.jpeg;*.png";
-
-                if (dialog.ShowDialog() == DialogResult.OK)
-                {
-                    rutaImagenTemporal = dialog.FileName;
-                    // Asegúrate de que el control PictureBox en tu formulario se llame pbxFotografia
-                    pbxFotografia.Image = Image.FromFile(rutaImagenTemporal);
-                }
-            }
         }
     }
 }

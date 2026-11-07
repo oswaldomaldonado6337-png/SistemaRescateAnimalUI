@@ -29,15 +29,18 @@
         private void InitializeComponent()
         {
             statusStrip1 = new StatusStrip();
-            toolStripStatusLabel1 = new ToolStripStatusLabel();
+            lblAutores = new ToolStripStatusLabel();
             menuStrip1 = new MenuStrip();
             módulosToolStripMenuItem = new ToolStripMenuItem();
             gestiónDeAnimalesToolStripMenuItem = new ToolStripMenuItem();
+            móduloSecundarioToolStripMenuItem = new ToolStripMenuItem();
             ventanaToolStripMenuItem1 = new ToolStripMenuItem();
             cascadaToolStripMenuItem1 = new ToolStripMenuItem();
             mosaicoVerticalToolStripMenuItem1 = new ToolStripMenuItem();
             mosaicoHorizontalToolStripMenuItem1 = new ToolStripMenuItem();
-            móduloSecundarioToolStripMenuItem = new ToolStripMenuItem();
+            lblUsuario = new ToolStripStatusLabel();
+            lblRol = new ToolStripStatusLabel();
+            lblHora = new ToolStripStatusLabel();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -45,18 +48,18 @@
             // statusStrip1
             // 
             statusStrip1.ImageScalingSize = new Size(24, 24);
-            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1 });
+            statusStrip1.Items.AddRange(new ToolStripItem[] { lblAutores, lblUsuario, lblRol, lblHora });
             statusStrip1.Location = new Point(0, 418);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(800, 32);
             statusStrip1.TabIndex = 0;
             statusStrip1.Text = "statusStrip1";
             // 
-            // toolStripStatusLabel1
+            // lblAutores
             // 
-            toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(1037, 25);
-            toolStripStatusLabel1.Text = "FLORES MONTANO, Carlos Roberto - GONZALEZ ALVARADO, Alexa Michelle - MALDONADO LLAMAS, Oswaldo Daniel | Equipo 5";
+            lblAutores.Name = "lblAutores";
+            lblAutores.Size = new Size(1037, 25);
+            lblAutores.Text = "FLORES MONTANO, Carlos Roberto - GONZALEZ ALVARADO, Alexa Michelle - MALDONADO LLAMAS, Oswaldo Daniel | Equipo 5";
             // 
             // menuStrip1
             // 
@@ -75,6 +78,7 @@
             módulosToolStripMenuItem.Name = "módulosToolStripMenuItem";
             módulosToolStripMenuItem.Size = new Size(99, 29);
             módulosToolStripMenuItem.Text = "Módulos";
+            módulosToolStripMenuItem.Click += módulosToolStripMenuItem_Click;
             // 
             // gestiónDeAnimalesToolStripMenuItem
             // 
@@ -82,6 +86,13 @@
             gestiónDeAnimalesToolStripMenuItem.Size = new Size(276, 34);
             gestiónDeAnimalesToolStripMenuItem.Text = "Gestión de Animales";
             gestiónDeAnimalesToolStripMenuItem.Click += gestiónDeAnimalesToolStripMenuItem_Click;
+            // 
+            // móduloSecundarioToolStripMenuItem
+            // 
+            móduloSecundarioToolStripMenuItem.Name = "móduloSecundarioToolStripMenuItem";
+            móduloSecundarioToolStripMenuItem.Size = new Size(276, 34);
+            móduloSecundarioToolStripMenuItem.Text = "Módulo Secundario";
+            móduloSecundarioToolStripMenuItem.Click += móduloSecundarioToolStripMenuItem_Click;
             // 
             // ventanaToolStripMenuItem1
             // 
@@ -111,12 +122,23 @@
             mosaicoHorizontalToolStripMenuItem1.Text = "Mosaico Horizontal";
             mosaicoHorizontalToolStripMenuItem1.Click += mosaicoHorizontalToolStripMenuItem1_Click;
             // 
-            // móduloSecundarioToolStripMenuItem
+            // lblUsuario
             // 
-            móduloSecundarioToolStripMenuItem.Name = "móduloSecundarioToolStripMenuItem";
-            móduloSecundarioToolStripMenuItem.Size = new Size(276, 34);
-            móduloSecundarioToolStripMenuItem.Text = "Módulo Secundario";
-            móduloSecundarioToolStripMenuItem.Click += móduloSecundarioToolStripMenuItem_Click;
+            lblUsuario.Name = "lblUsuario";
+            lblUsuario.Size = new Size(76, 25);
+            lblUsuario.Text = "Usuario:";
+            // 
+            // lblRol
+            // 
+            lblRol.Name = "lblRol";
+            lblRol.Size = new Size(54, 25);
+            lblRol.Text = "Perfil:";
+            // 
+            // lblHora
+            // 
+            lblHora.Name = "lblHora";
+            lblHora.Size = new Size(90, 25);
+            lblHora.Text = "Conexión:";
             // 
             // FrmPrincipalMDI
             // 
@@ -129,6 +151,7 @@
             MainMenuStrip = menuStrip1;
             Name = "FrmPrincipalMDI";
             Text = "FrmPrincipalMDI";
+            Load += FrmPrincipalMDI_Load;
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             menuStrip1.ResumeLayout(false);
@@ -140,7 +163,7 @@
         #endregion
 
         private StatusStrip statusStrip1;
-        private ToolStripStatusLabel toolStripStatusLabel1;
+        private ToolStripStatusLabel lblAutores;
         private MenuStrip menuStrip1;
         private ToolStripMenuItem módulosToolStripMenuItem;
         private ToolStripMenuItem gestiónDeAnimalesToolStripMenuItem;
@@ -149,5 +172,8 @@
         private ToolStripMenuItem mosaicoVerticalToolStripMenuItem1;
         private ToolStripMenuItem mosaicoHorizontalToolStripMenuItem1;
         private ToolStripMenuItem móduloSecundarioToolStripMenuItem;
+        private ToolStripStatusLabel lblUsuario;
+        private ToolStripStatusLabel lblRol;
+        private ToolStripStatusLabel lblHora;
     }
 }
