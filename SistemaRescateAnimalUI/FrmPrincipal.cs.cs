@@ -40,5 +40,10 @@ namespace SistemaRescateAnimalUI
             ventanaAnimales.MdiParent = this; // Le decimos que esta ventana principal es su "papá" (el contenedor)
             ventanaAnimales.Show(); // Y por último, la mostramos en pantalla flotando
         }
+
+        private void mantenimientoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

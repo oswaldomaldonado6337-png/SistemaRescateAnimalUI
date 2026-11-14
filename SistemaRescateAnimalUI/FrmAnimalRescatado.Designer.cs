@@ -46,8 +46,11 @@
             btnMasterActualizar = new Button();
             btnMasterEliminar = new Button();
             errorProvider1 = new ErrorProvider(components);
+            dgvAnimales = new DataGridView();
+            btnTestConexion = new Button();
             ((System.ComponentModel.ISupportInitialize)numPeso).BeginInit();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvAnimales).BeginInit();
             SuspendLayout();
             // 
             // txtNombre
@@ -200,11 +203,34 @@
             // 
             errorProvider1.ContainerControl = this;
             // 
+            // dgvAnimales
+            // 
+            dgvAnimales.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvAnimales.Location = new Point(640, 195);
+            dgvAnimales.Name = "dgvAnimales";
+            dgvAnimales.ReadOnly = true;
+            dgvAnimales.RowHeadersWidth = 62;
+            dgvAnimales.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvAnimales.Size = new Size(360, 225);
+            dgvAnimales.TabIndex = 17;
+            // 
+            // btnTestConexion
+            // 
+            btnTestConexion.Location = new Point(141, 489);
+            btnTestConexion.Name = "btnTestConexion";
+            btnTestConexion.Size = new Size(262, 34);
+            btnTestConexion.TabIndex = 18;
+            btnTestConexion.Text = "Test Conexión";
+            btnTestConexion.UseVisualStyleBackColor = true;
+            btnTestConexion.Click += button1_Click;
+            // 
             // FrmAnimalRescatado
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1050, 488);
+            ClientSize = new Size(1050, 525);
+            Controls.Add(btnTestConexion);
+            Controls.Add(dgvAnimales);
             Controls.Add(lblId);
             Controls.Add(txtIdBusqueda);
             Controls.Add(btnMasterBuscar);
@@ -228,6 +254,7 @@
             Text = "FrmAnimalRescatado";
             ((System.ComponentModel.ISupportInitialize)numPeso).EndInit();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvAnimales).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -250,5 +277,7 @@
         private Button btnMasterGuardar;
         private Button btnMasterActualizar;
         private Button btnMasterEliminar;
+        private DataGridView dgvAnimales;
+        private Button btnTestConexion;
     }
 }

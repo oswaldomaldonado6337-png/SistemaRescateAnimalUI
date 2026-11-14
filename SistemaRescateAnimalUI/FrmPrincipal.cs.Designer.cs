@@ -18,10 +18,10 @@
         private void InitializeComponent()
         {
             pnlBarraHerramientas = new FlowLayoutPanel();
-            statusStrip1 = new StatusStrip();
             menuStrip1 = new MenuStrip();
             mantenimientoToolStripMenuItem = new ToolStripMenuItem();
             animalesRescatadosToolStripMenuItem = new ToolStripMenuItem();
+            statusStrip1 = new StatusStrip();
             pnlBarraHerramientas.SuspendLayout();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -37,15 +37,6 @@
             pnlBarraHerramientas.Padding = new Padding(12);
             pnlBarraHerramientas.Size = new Size(1125, 57);
             pnlBarraHerramientas.TabIndex = 0;
-            // 
-            // statusStrip1
-            // 
-            statusStrip1.ImageScalingSize = new Size(24, 24);
-            statusStrip1.Location = new Point(0, 666);
-            statusStrip1.Name = "statusStrip1";
-            statusStrip1.Padding = new Padding(1, 0, 18, 0);
-            statusStrip1.Size = new Size(1125, 22);
-            statusStrip1.TabIndex = 2;
             // 
             // menuStrip1
             // 
@@ -63,6 +54,7 @@
             mantenimientoToolStripMenuItem.Name = "mantenimientoToolStripMenuItem";
             mantenimientoToolStripMenuItem.Size = new Size(148, 29);
             mantenimientoToolStripMenuItem.Text = "Mantenimiento";
+            mantenimientoToolStripMenuItem.Click += mantenimientoToolStripMenuItem_Click;
             // 
             // animalesRescatadosToolStripMenuItem
             // 
@@ -70,6 +62,15 @@
             animalesRescatadosToolStripMenuItem.Size = new Size(280, 34);
             animalesRescatadosToolStripMenuItem.Text = "Animales Rescatados";
             animalesRescatadosToolStripMenuItem.Click += animalesRescatadosToolStripMenuItem_Click;
+            // 
+            // statusStrip1
+            // 
+            statusStrip1.ImageScalingSize = new Size(24, 24);
+            statusStrip1.Location = new Point(0, 666);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Padding = new Padding(1, 0, 18, 0);
+            statusStrip1.Size = new Size(1125, 22);
+            statusStrip1.TabIndex = 2;
             // 
             // FrmPrincipal
             // 

@@ -1,5 +1,5 @@
 ﻿/*
-- ASIGNATURA: Programación Orientada a Eventos
+- Materia: Programación Orientada a Eventos
 - EQUIPO: 4
 - INTEGRANTES:
 - FLORES MONTAÑO, Roberto Carlos
@@ -11,30 +11,37 @@ using System.Collections.Generic;
 
 namespace SistemaRescateAnimal.Models
 {
+    // Heredo de EntidadBase para reciclar campos comunes (Id, EsActivo) y aplico la interfaz para el polimorfismo del CRUD
     public class AnimalRescatado : EntidadBase, IAlmacenamientoCRUD
     {
+        // Lista en memoria (se mantiene por compatibilidad con la entrega anterior del proyecto)
         private static List<AnimalRescatado> _listaMemoria = new List<AnimalRescatado>();
 
         public string Nombre { get; set; } = string.Empty;
         public string Especie { get; set; } = string.Empty;
         public double Peso { get; set; }
-
         public string RutaImagen { get; set; } = string.Empty;
 
-        private Stack<string> _historialCambios;
+        // Campos nuevos agregados para hacer match con las columnas de MariaDB
+        public DateTime FechaNacimientoEstimada { get; set; }
+        public string UbicacionFisica { get; set; } = string.Empty;
+        public DateTime FechaRescate { get; set; }
+        public string LugarHallazgo { get; set; } = string.Empty;
+        public string CondicionHallazgo { get; set; } = string.Empty;
 
+        private Stack<string> _historialCambios;
         public Stack<string> HistorialCambios
         {
             get { return _historialCambios; }
         }
 
         private Queue<string> _colaAtencion;
-
         public Queue<string> ColaAtencion
         {
             get { return _colaAtencion; }
         }
 
+        // Sobrecarga de constructores para dar flexibilidad al instanciar
         public AnimalRescatado() : base()
         {
             _historialCambios = new Stack<string>();

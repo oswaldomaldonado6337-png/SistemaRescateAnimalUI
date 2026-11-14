@@ -680,5 +680,26 @@ namespace SistemaRescateAnimalUI
         {
             EjecutarEliminar(null);
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Pruebo que mi Singleton de MariaDB funcione
+                SistemaRescateAnimalUI.Data.ConexionMariaDB conMaria = new SistemaRescateAnimalUI.Data.ConexionMariaDB();
+                var sqlSocket = conMaria.ObtenerConexion();
+
+                // Pruebo mi conexión remota a Atlas
+                SistemaRescateAnimalUI.Data.ConexionMongoDB conMongo = new SistemaRescateAnimalUI.Data.ConexionMongoDB();
+                var mongoDb = conMongo.ObtenerBaseDatos();
+
+                MessageBox.Show($"¡Arquitectura Híbrida Exitosa!\n\nMariaDB Estado: {sqlSocket.State}\nMongoDB Atlas: Conectado a {mongoDb.DatabaseNamespace.DatabaseName}",
+                                "Test de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }
