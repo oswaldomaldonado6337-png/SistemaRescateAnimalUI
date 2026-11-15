@@ -4,21 +4,26 @@
 // - GONZALEZ ALVARADO, Alexa Michelle
 // - MALDONADO LLAMAS, Oswaldo Daniel
 // ============================================================================
-using System.IO;
+using System.Xml.Serialization;
+using SistemaRescateAnimal.Datos;
+using SistemaRescateAnimal.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Media;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using SistemaRescateAnimal.Models;
 
 namespace SistemaRescateAnimalUI
 {
     public partial class FrmAnimalRescatado : FrmBase, IPanelCRUD
     {
+
+        private readonly AnimalDAO _animalDAO = new AnimalDAO();
+        private readonly Utils.BackupController _backupCtrl = new Utils.BackupController();
         private static AnimalRescatado _modeloAnimal = new AnimalRescatado();
         private static int _contadorId = 101;
         private ErrorProvider errorProvider1 = new ErrorProvider();
@@ -26,6 +31,7 @@ namespace SistemaRescateAnimalUI
 
         // Estructura de datos Pila (Actividad 2.5)
         private AnimalHistorial historialPila = new AnimalHistorial();
+        [XmlIgnore]
 
         // Componentes para la interfaz del historial
         private GroupBox grpPila = new GroupBox();
@@ -78,8 +84,8 @@ namespace SistemaRescateAnimalUI
             }
 
             // Ajuste del formulario para dar cabida a Pila, Concurrencia e Imagen
-            this.ClientSize = new Size(1120, 540);
-            if (this.Width < 1120) this.Width = 1120;
+            //this.ClientSize = new Size(1120, 540);
+            //if (this.Width < 1120) this.Width = 1120;
 
             grpPila.Text = " Control Histórico (Pila LIFO) ";
             grpPila.Location = new Point(540, 75);
@@ -188,8 +194,14 @@ namespace SistemaRescateAnimalUI
 
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
+                    // Conservamos tu variable
                     rutaImagenTemporal = dialog.FileName;
-                    pbxFotografia.Image = Image.FromFile(rutaImagenTemporal);
+
+                    // Carga segura exigida por la rúbrica (evita el bloqueo del archivo)
+                    using (System.IO.FileStream stream = new System.IO.FileStream(rutaImagenTemporal, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+                    {
+                        pbxFotografia.Image = Image.FromStream(stream);
+                    }
                 }
             }
         }
@@ -454,7 +466,7 @@ namespace SistemaRescateAnimalUI
                     RutaImagen = nombreArchivoFinal
                 };
 
-                _modeloAnimal.InsertarRegistro(animal);
+                _animalDAO.RegistrarAnimal(animal);
                 txtIdBusqueda.Text = idFinal;
 
                 if (idFinal == _contadorId.ToString()) _contadorId++;
@@ -476,66 +488,11 @@ namespace SistemaRescateAnimalUI
             }
         }
 
-        public void EjecutarBuscar(string id, ErrorProvider alerta)
+        
+
+        private void txtEspecie_TextChanged(object sender, EventArgs e)
         {
-            errorProvider1.SetIconAlignment(txtIdBusqueda, ErrorIconAlignment.MiddleLeft);
-            errorProvider1.SetIconPadding(txtIdBusqueda, 5);
 
-            if (alerta != null)
-            {
-                alerta.SetIconAlignment(txtIdBusqueda, ErrorIconAlignment.MiddleLeft);
-                alerta.SetIconPadding(txtIdBusqueda, 5);
-                alerta.Clear();
-            }
-            errorProvider1.SetError(txtIdBusqueda, "");
-
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                string msjVacio = "Ingrese un ID válido para buscar.";
-                errorProvider1.SetError(txtIdBusqueda, msjVacio);
-                if (alerta != null) alerta.SetError(txtIdBusqueda, msjVacio);
-                MessageBox.Show(msjVacio, "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            foreach (char c in id)
-            {
-                if (!char.IsLetterOrDigit(c))
-                {
-                    string msjSimbolo = "El ID no debe contener símbolos o caracteres especiales (% , & , *).";
-                    errorProvider1.SetError(txtIdBusqueda, msjSimbolo);
-                    if (alerta != null) alerta.SetError(txtIdBusqueda, msjSimbolo);
-
-                    LimpiarFormulario();
-                    txtIdBusqueda.Text = id;
-
-                    MessageBox.Show(msjSimbolo, "Error de Validación de ID", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-            }
-
-            var resultado = _modeloAnimal.ConsultarRegistro(id) as AnimalRescatado;
-
-            if (resultado != null)
-            {
-                txtIdBusqueda.Text = resultado.Id;
-                txtNombre.Text = resultado.Nombre;
-                txtEspecie.Text = resultado.Especie;
-                numPeso.Text = resultado.Peso.ToString();
-                dtpFechaRegistro.Value = resultado.FechaRegistro;
-                chkEsActivo.Checked = resultado.EsActivo;
-
-                errorProvider1.Clear();
-                if (alerta != null) alerta.Clear();
-
-                MessageBox.Show($"Registro encontrado: {resultado.Nombre}", "Búsqueda exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
-            {
-                LimpiarFormulario();
-                txtIdBusqueda.Text = id;
-                MessageBox.Show($"No existe ningún registro guardado con el ID: '{id}'.", "Sin resultados", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            }
         }
 
         public void EjecutarActualizar()
@@ -659,6 +616,19 @@ namespace SistemaRescateAnimalUI
 
         private void FrmAnimalRescatado_Load(object sender, EventArgs e)
         {
+            try
+            {
+                var lista = _animalDAO.ObtenerTodos();
+                if (lista.Count > 0)
+                {
+                    dgvAnimales.DataSource = lista;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Ignoramos errores silenciosos al cargar por ahora
+                // RECUERDA MODIFICAR/CHECAR ESTO POSTERIORMENTE
+            }
         }
 
         private void btnMasterGuardar_Click(object sender, EventArgs e)
@@ -699,6 +669,146 @@ namespace SistemaRescateAnimalUI
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnExportarJSON_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var listaAnimales = _animalDAO.ObtenerTodos();
+                if (listaAnimales != null && listaAnimales.Count > 0)
+                {
+                    _backupCtrl.ExportarJSON(listaAnimales);
+                }
+                else
+                {
+                    MessageBox.Show("No hay registros en la base de datos para exportar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al exportar JSON: " + ex.Message, "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnExportarXML_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var listaAnimales = _animalDAO.ObtenerTodos();
+                if (listaAnimales != null && listaAnimales.Count > 0)
+                {
+                    _backupCtrl.ExportarXML(listaAnimales);
+                }
+                else
+                {
+                    MessageBox.Show("No hay registros en la base de datos para exportar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al exportar XML: " + ex.Message, "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnImportar_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                ofd.Filter = "Archivos de respaldo|*.json;*.xml";
+                ofd.Title = "Seleccionar archivo de respaldo";
+                ofd.InitialDirectory = System.IO.Path.Combine(Application.StartupPath, "Backups");
+
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    List<SistemaRescateAnimal.Models.AnimalRescatado> datosRecuperados = null;
+
+                    if (ofd.FileName.EndsWith(".json"))
+                        datosRecuperados = _backupCtrl.ImportarJSON(ofd.FileName);
+                    else if (ofd.FileName.EndsWith(".xml"))
+                        datosRecuperados = _backupCtrl.ImportarXML(ofd.FileName);
+
+                    if (datosRecuperados != null)
+                    {
+                        // Si decides mostrar los datos recuperados en tu pantalla, 
+                        // aquí puedes asignarlos a un DataGridView o ListBox
+                        MessageBox.Show("Datos restaurados con éxito.", "Importación completada", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+        }
+        public void EjecutarBuscar(string id, ErrorProvider alerta)
+        {
+            // 1. Configuramos y limpiamos las alertas visuales
+            errorProvider1.SetIconAlignment(txtIdBusqueda, ErrorIconAlignment.MiddleLeft);
+            errorProvider1.SetIconPadding(txtIdBusqueda, 5);
+
+            if (alerta != null)
+            {
+                alerta.SetIconAlignment(txtIdBusqueda, ErrorIconAlignment.MiddleLeft);
+                alerta.SetIconPadding(txtIdBusqueda, 5);
+                alerta.Clear();
+            }
+            errorProvider1.SetError(txtIdBusqueda, "");
+
+            // 2. Validamos que no esté vacío
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                string msjVacio = "Ingrese un ID válido para buscar.";
+                errorProvider1.SetError(txtIdBusqueda, msjVacio);
+                if (alerta != null) alerta.SetError(txtIdBusqueda, msjVacio);
+                MessageBox.Show(msjVacio, "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 3. Validamos que no tenga símbolos raros
+            foreach (char c in id)
+            {
+                if (!char.IsLetterOrDigit(c))
+                {
+                    string msjSimbolo = "El ID no debe contener símbolos o caracteres especiales (% , & , *).";
+                    errorProvider1.SetError(txtIdBusqueda, msjSimbolo);
+                    if (alerta != null) alerta.SetError(txtIdBusqueda, msjSimbolo);
+
+                    LimpiarFormulario();
+                    txtIdBusqueda.Text = id;
+
+                    MessageBox.Show(msjSimbolo, "Error de Validación de ID", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
+            // 4. Búsqueda en la Base de Datos (MariaDB) usando tu DAO
+            try
+            {
+                var resultado = _animalDAO.ObtenerPorId(id);
+
+                if (resultado != null)
+                {
+                    // Llenamos el formulario con lo que trajimos de la BD
+                    txtIdBusqueda.Text = resultado.Id;
+                    txtNombre.Text = resultado.Nombre;
+                    txtEspecie.Text = resultado.Especie;
+                    numPeso.Text = resultado.Peso.ToString();
+                    dtpFechaRegistro.Value = resultado.FechaRegistro;
+                    chkEsActivo.Checked = resultado.EsActivo;
+
+                    errorProvider1.Clear();
+                    if (alerta != null) alerta.Clear();
+
+                    MessageBox.Show($"Registro encontrado: {resultado.Nombre}", "Búsqueda exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    LimpiarFormulario();
+                    txtIdBusqueda.Text = id;
+                    MessageBox.Show($"No existe ningún registro guardado con el ID: '{id}'.", "Sin resultados", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al buscar en la base de datos: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

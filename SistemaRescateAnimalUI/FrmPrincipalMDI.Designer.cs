@@ -30,6 +30,9 @@
         {
             statusStrip1 = new StatusStrip();
             lblAutores = new ToolStripStatusLabel();
+            lblUsuario = new ToolStripStatusLabel();
+            lblRol = new ToolStripStatusLabel();
+            lblHora = new ToolStripStatusLabel();
             menuStrip1 = new MenuStrip();
             módulosToolStripMenuItem = new ToolStripMenuItem();
             gestiónDeAnimalesToolStripMenuItem = new ToolStripMenuItem();
@@ -38,9 +41,7 @@
             cascadaToolStripMenuItem1 = new ToolStripMenuItem();
             mosaicoVerticalToolStripMenuItem1 = new ToolStripMenuItem();
             mosaicoHorizontalToolStripMenuItem1 = new ToolStripMenuItem();
-            lblUsuario = new ToolStripStatusLabel();
-            lblRol = new ToolStripStatusLabel();
-            lblHora = new ToolStripStatusLabel();
+            listadoDeAdopcionesToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -61,6 +62,24 @@
             lblAutores.Size = new Size(1037, 25);
             lblAutores.Text = "FLORES MONTANO, Carlos Roberto - GONZALEZ ALVARADO, Alexa Michelle - MALDONADO LLAMAS, Oswaldo Daniel | Equipo 5";
             // 
+            // lblUsuario
+            // 
+            lblUsuario.Name = "lblUsuario";
+            lblUsuario.Size = new Size(76, 25);
+            lblUsuario.Text = "Usuario:";
+            // 
+            // lblRol
+            // 
+            lblRol.Name = "lblRol";
+            lblRol.Size = new Size(54, 25);
+            lblRol.Text = "Perfil:";
+            // 
+            // lblHora
+            // 
+            lblHora.Name = "lblHora";
+            lblHora.Size = new Size(90, 25);
+            lblHora.Text = "Conexión:";
+            // 
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(24, 24);
@@ -74,7 +93,7 @@
             // 
             // módulosToolStripMenuItem
             // 
-            módulosToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { gestiónDeAnimalesToolStripMenuItem, móduloSecundarioToolStripMenuItem });
+            módulosToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { gestiónDeAnimalesToolStripMenuItem, móduloSecundarioToolStripMenuItem, listadoDeAdopcionesToolStripMenuItem });
             módulosToolStripMenuItem.Name = "módulosToolStripMenuItem";
             módulosToolStripMenuItem.Size = new Size(99, 29);
             módulosToolStripMenuItem.Text = "Módulos";
@@ -83,14 +102,14 @@
             // gestiónDeAnimalesToolStripMenuItem
             // 
             gestiónDeAnimalesToolStripMenuItem.Name = "gestiónDeAnimalesToolStripMenuItem";
-            gestiónDeAnimalesToolStripMenuItem.Size = new Size(276, 34);
+            gestiónDeAnimalesToolStripMenuItem.Size = new Size(296, 34);
             gestiónDeAnimalesToolStripMenuItem.Text = "Gestión de Animales";
             gestiónDeAnimalesToolStripMenuItem.Click += gestiónDeAnimalesToolStripMenuItem_Click;
             // 
             // móduloSecundarioToolStripMenuItem
             // 
             móduloSecundarioToolStripMenuItem.Name = "móduloSecundarioToolStripMenuItem";
-            móduloSecundarioToolStripMenuItem.Size = new Size(276, 34);
+            móduloSecundarioToolStripMenuItem.Size = new Size(296, 34);
             móduloSecundarioToolStripMenuItem.Text = "Módulo Secundario";
             móduloSecundarioToolStripMenuItem.Click += móduloSecundarioToolStripMenuItem_Click;
             // 
@@ -122,23 +141,12 @@
             mosaicoHorizontalToolStripMenuItem1.Text = "Mosaico Horizontal";
             mosaicoHorizontalToolStripMenuItem1.Click += mosaicoHorizontalToolStripMenuItem1_Click;
             // 
-            // lblUsuario
+            // listadoDeAdopcionesToolStripMenuItem
             // 
-            lblUsuario.Name = "lblUsuario";
-            lblUsuario.Size = new Size(76, 25);
-            lblUsuario.Text = "Usuario:";
-            // 
-            // lblRol
-            // 
-            lblRol.Name = "lblRol";
-            lblRol.Size = new Size(54, 25);
-            lblRol.Text = "Perfil:";
-            // 
-            // lblHora
-            // 
-            lblHora.Name = "lblHora";
-            lblHora.Size = new Size(90, 25);
-            lblHora.Text = "Conexión:";
+            listadoDeAdopcionesToolStripMenuItem.Name = "listadoDeAdopcionesToolStripMenuItem";
+            listadoDeAdopcionesToolStripMenuItem.Size = new Size(296, 34);
+            listadoDeAdopcionesToolStripMenuItem.Text = "Listado de Adopciones";
+            listadoDeAdopcionesToolStripMenuItem.Click += listadoDeAdopcionesToolStripMenuItem_Click;
             // 
             // FrmPrincipalMDI
             // 
@@ -175,5 +183,6 @@
         private ToolStripStatusLabel lblUsuario;
         private ToolStripStatusLabel lblRol;
         private ToolStripStatusLabel lblHora;
+        private ToolStripMenuItem listadoDeAdopcionesToolStripMenuItem;
     }
 }

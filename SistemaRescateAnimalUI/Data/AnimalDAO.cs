@@ -1,4 +1,6 @@
-﻿using MySqlConnector;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
+using MySqlConnector;
 using SistemaRescateAnimal.Models;
 using SistemaRescateAnimalUI.Data;
 using System;
@@ -19,6 +21,7 @@ namespace SistemaRescateAnimal.Datos
         public bool RegistrarAnimal(AnimalRescatado animal)
         {
             bool exito = false;
+
 
             // Pido la conexión sin el 'using' para no destruir mi Singleton
             MySqlConnection conexion = _conexionMariaDB.ObtenerConexion();
@@ -58,6 +61,45 @@ namespace SistemaRescateAnimal.Datos
             }
 
             return exito;
+        }
+        public AnimalRescatado ObtenerPorId(string id)
+        {
+            AnimalRescatado animal = null;
+            MySqlConnection conexion = _conexionMariaDB.ObtenerConexion();
+
+            string query = "SELECT * FROM animales WHERE IdAnimal = @id";
+
+            using (MySqlCommand comando = new MySqlCommand(query, conexion))
+            {
+                comando.Parameters.AddWithValue("@id", id);
+                try
+                {
+                    using (MySqlDataReader reader = comando.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            animal = new AnimalRescatado();
+                            animal.Id = reader["IdAnimal"].ToString();
+                            animal.Nombre = reader["Nombre"].ToString();
+                            animal.Especie = reader["Especie"].ToString();
+                            animal.Peso = Convert.ToDouble(reader["Peso"]);
+                            animal.FechaNacimientoEstimada = Convert.ToDateTime(reader["FechaNacimientoEstimada"]);
+                            animal.UbicacionFisica = reader["UbicacionFisica"].ToString();
+                            animal.FechaRescate = Convert.ToDateTime(reader["FechaRescate"]);
+                            animal.LugarHallazgo = reader["LugarHallazgo"].ToString();
+                            animal.CondicionHallazgo = reader["CondicionHallazgo"].ToString();
+                            animal.FechaRegistro = Convert.ToDateTime(reader["FechaRegistro"]);
+                            animal.EsActivo = Convert.ToBoolean(reader["EsActivo"]);
+                            animal.RutaImagen = reader["RutaImagen"].ToString();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error DAO al buscar: " + ex.Message);
+                }
+            }
+            return animal;
         }
 
         public List<AnimalRescatado> ObtenerTodos()
@@ -101,6 +143,103 @@ namespace SistemaRescateAnimal.Datos
             }
 
             return lista;
+        }
+
+        public System.Data.DataTable ObtenerAdopcionesConDetalles()
+        {
+            System.Data.DataTable dtAdopciones = new System.Data.DataTable();
+
+            // Obtener la conexión usando tu Singleton
+            MySqlConnector.MySqlConnection conexion = _conexionMariaDB.ObtenerConexion();
+
+            string query = @"
+                SELECT 
+                adop.IdAdopcion AS 'Folio Adopción',
+                anim.Nombre AS 'Nombre del Animal',
+                anim.Especie AS 'Especie',
+                CONCAT(adte.Nombre, ' ', adte.ApellidoPaterno) AS 'Adoptante',
+                adop.FechaAdopcion AS 'Fecha de Adopción',
+                adop.Observaciones AS 'Observaciones'
+                FROM adopciones adop
+                INNER JOIN animales anim ON adop.IdAnimal = anim.IdAnimal
+                INNER JOIN adoptantes adte ON adop.IdAdoptante = adte.IdAdoptante;";
+
+            using (MySqlConnector.MySqlCommand cmd = new MySqlConnector.MySqlCommand(query, conexion))
+            {
+                try
+                {
+                    using (MySqlConnector.MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        dtAdopciones.Load(reader);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error al consultar el INNER JOIN: " + ex.Message);
+                }
+            }
+
+            return dtAdopciones;
+        }
+
+        public System.Data.DataTable ObtenerAdopcionesConLookupMongo()
+        {
+            System.Data.DataTable dtAdopciones = new System.Data.DataTable();
+            dtAdopciones.Columns.Add("Folio Adopción");
+            dtAdopciones.Columns.Add("Nombre del Animal");
+            dtAdopciones.Columns.Add("Fecha de Adopción");
+            dtAdopciones.Columns.Add("Observaciones");
+
+            try
+            {
+                // 1. Usamos TU clase de conexión exacta
+                ConexionMongoDB conexionMongo = new ConexionMongoDB();
+                var database = conexionMongo.ObtenerBaseDatos();
+
+                // Conectamos a la colección (Asegúrate de que en Atlas se llame "adopciones" en minúscula)
+                var adopcionesCollection = database.GetCollection<BsonDocument>("adopciones");
+
+                // 2. El Pipeline de Agregación con $lookup
+                var pipeline = new BsonDocument[]
+                {
+            new BsonDocument("$lookup", new BsonDocument
+            {
+                { "from", "animales" },
+                { "localField", "IdAnimal" },     // Llave en adopciones
+                { "foreignField", "IdAnimal" },   // Llave en animales
+                { "as", "AnimalDetalles" }
+            }),
+            new BsonDocument("$unwind", "$AnimalDetalles"),
+            new BsonDocument("$project", new BsonDocument
+            {
+                { "_id", 0 }, // Ocultamos el Object ID alfanumérico feo de Mongo
+                { "IdAdopcion", 1 },
+                { "NombreAnimal", "$AnimalDetalles.Nombre" },
+                { "FechaAdopcion", 1 },
+                { "Observaciones", 1 }
+            })
+                };
+
+                // 3. Ejecutamos la consulta en Atlas
+                var resultados = adopcionesCollection.Aggregate<BsonDocument>(pipeline).ToList();
+
+                // 4. Llenamos el DataTable
+                foreach (var doc in resultados)
+                {
+                    dtAdopciones.Rows.Add(
+                        doc.GetValue("IdAdopcion", "N/A").ToString(),
+                        doc.GetValue("NombreAnimal", "N/A").ToString(),
+                        doc.GetValue("FechaAdopcion", "N/A").ToString(),
+                        doc.GetValue("Observaciones", "N/A").ToString()
+                    );
+                }
+            }
+            catch (System.Exception ex)
+            {
+                throw new System.Exception("Error en $lookup de MongoDB: " + ex.Message);
+            }
+
+            return dtAdopciones;
         }
     }
 }

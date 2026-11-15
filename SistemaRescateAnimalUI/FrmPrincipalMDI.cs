@@ -120,5 +120,12 @@ namespace SistemaRescateAnimalUI
                 módulosToolStripMenuItem.Enabled = false;
             }
         }
+
+        private void listadoDeAdopcionesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FrmListadoAdopciones frmListado = new FrmListadoAdopciones();
+            frmListado.MdiParent = this; // Le decimos que el MDI es su padre
+            frmListado.Show();
+        }
     }
 }

@@ -8,9 +8,11 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 
 namespace SistemaRescateAnimal.Models
 {
+
     // Heredo de EntidadBase para reciclar campos comunes (Id, EsActivo) y aplico la interfaz para el polimorfismo del CRUD
     public class AnimalRescatado : EntidadBase, IAlmacenamientoCRUD
     {
@@ -30,12 +32,15 @@ namespace SistemaRescateAnimal.Models
         public string CondicionHallazgo { get; set; } = string.Empty;
 
         private Stack<string> _historialCambios;
+        [XmlIgnore]
         public Stack<string> HistorialCambios
         {
             get { return _historialCambios; }
         }
 
         private Queue<string> _colaAtencion;
+        [XmlIgnore]
+
         public Queue<string> ColaAtencion
         {
             get { return _colaAtencion; }

@@ -46,11 +46,12 @@
             btnMasterActualizar = new Button();
             btnMasterEliminar = new Button();
             errorProvider1 = new ErrorProvider(components);
-            dgvAnimales = new DataGridView();
             btnTestConexion = new Button();
+            btnExportarJSON = new Button();
+            btnExportarXML = new Button();
+            btnImportar = new Button();
             ((System.ComponentModel.ISupportInitialize)numPeso).BeginInit();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)dgvAnimales).BeginInit();
             SuspendLayout();
             // 
             // txtNombre
@@ -122,9 +123,9 @@
             chkEsActivo.AutoSize = true;
             chkEsActivo.Location = new Point(95, 321);
             chkEsActivo.Name = "chkEsActivo";
-            chkEsActivo.Size = new Size(133, 29);
+            chkEsActivo.Size = new Size(161, 29);
             chkEsActivo.TabIndex = 9;
-            chkEsActivo.Text = "Esta Activo?";
+            chkEsActivo.Text = "Esta Vacunado?";
             chkEsActivo.UseVisualStyleBackColor = true;
             // 
             // label5
@@ -203,17 +204,6 @@
             // 
             errorProvider1.ContainerControl = this;
             // 
-            // dgvAnimales
-            // 
-            dgvAnimales.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvAnimales.Location = new Point(640, 195);
-            dgvAnimales.Name = "dgvAnimales";
-            dgvAnimales.ReadOnly = true;
-            dgvAnimales.RowHeadersWidth = 62;
-            dgvAnimales.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvAnimales.Size = new Size(360, 225);
-            dgvAnimales.TabIndex = 17;
-            // 
             // btnTestConexion
             // 
             btnTestConexion.Location = new Point(141, 489);
@@ -224,13 +214,45 @@
             btnTestConexion.UseVisualStyleBackColor = true;
             btnTestConexion.Click += button1_Click;
             // 
+            // btnExportarJSON
+            // 
+            btnExportarJSON.Location = new Point(786, 17);
+            btnExportarJSON.Name = "btnExportarJSON";
+            btnExportarJSON.Size = new Size(135, 34);
+            btnExportarJSON.TabIndex = 19;
+            btnExportarJSON.Text = "Exportar JSON";
+            btnExportarJSON.UseVisualStyleBackColor = true;
+            btnExportarJSON.Click += btnExportarJSON_Click;
+            // 
+            // btnExportarXML
+            // 
+            btnExportarXML.Location = new Point(927, 17);
+            btnExportarXML.Name = "btnExportarXML";
+            btnExportarXML.Size = new Size(130, 34);
+            btnExportarXML.TabIndex = 20;
+            btnExportarXML.Text = "Exportar XML";
+            btnExportarXML.UseVisualStyleBackColor = true;
+            btnExportarXML.Click += btnExportarXML_Click;
+            // 
+            // btnImportar
+            // 
+            btnImportar.Location = new Point(1072, 17);
+            btnImportar.Name = "btnImportar";
+            btnImportar.Size = new Size(112, 34);
+            btnImportar.TabIndex = 21;
+            btnImportar.Text = "Importar";
+            btnImportar.UseVisualStyleBackColor = true;
+            btnImportar.Click += btnImportar_Click;
+            // 
             // FrmAnimalRescatado
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1050, 525);
+            ClientSize = new Size(1233, 590);
+            Controls.Add(btnImportar);
+            Controls.Add(btnExportarXML);
+            Controls.Add(btnExportarJSON);
             Controls.Add(btnTestConexion);
-            Controls.Add(dgvAnimales);
             Controls.Add(lblId);
             Controls.Add(txtIdBusqueda);
             Controls.Add(btnMasterBuscar);
@@ -254,7 +276,6 @@
             Text = "FrmAnimalRescatado";
             ((System.ComponentModel.ISupportInitialize)numPeso).EndInit();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).EndInit();
-            ((System.ComponentModel.ISupportInitialize)dgvAnimales).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -279,5 +300,8 @@
         private Button btnMasterEliminar;
         private DataGridView dgvAnimales;
         private Button btnTestConexion;
+        private Button btnExportarXML;
+        private Button btnExportarJSON;
+        private Button btnImportar;
     }
 }
