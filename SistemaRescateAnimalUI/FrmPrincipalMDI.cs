@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using SistemaRescateAnimalUI.Models;
 
@@ -54,53 +49,67 @@ namespace SistemaRescateAnimalUI
         }
 
         // ============================================================================
-        // ALGORITMO DE INSTANCIA ÚNICA (MÓDULO ANIMALES)
+        // MÉTODO GENÉRICO PARA INSTANCIA ÚNICA (EVITA VENTANAS DUPLICADAS)
+        // ============================================================================
+        private void AbrirFormularioUnico<T>() where T : Form, new()
+        {
+            foreach (Form hijo in this.MdiChildren)
+            {
+                if (hijo is T)
+                {
+                    if (hijo.WindowState == FormWindowState.Minimized)
+                        hijo.WindowState = FormWindowState.Normal;
+
+                    hijo.Activate();
+                    return;
+                }
+            }
+
+            T nuevoFormulario = new T();
+            nuevoFormulario.MdiParent = this;
+            nuevoFormulario.Show();
+        }
+
+        // ============================================================================
+        // EVENTOS DE APERTURA DE MÓDULOS
         // ============================================================================
         private void gestiónDeAnimalesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is FrmAnimalRescatado)
-                {
-                    if (hijo.WindowState == FormWindowState.Minimized)
-                    {
-                        hijo.WindowState = FormWindowState.Normal;
-                    }
-                    hijo.Activate();
-                    return;
-                }
-            }
-
-            FrmAnimalRescatado frmAnimal = new FrmAnimalRescatado();
-            frmAnimal.MdiParent = this;
-            frmAnimal.Show();
+            AbrirFormularioUnico<FrmAnimalRescatado>();
         }
 
-        private void móduloSecundarioToolStripMenuItem_Click(object sender, EventArgs e)
+        private void listadoDeAdopcionesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (Form hijo in this.MdiChildren)
-            {
-                if (hijo is Form1)
-                {
-                    if (hijo.WindowState == FormWindowState.Minimized)
-                        hijo.WindowState = FormWindowState.Normal;
+            AbrirFormularioUnico<FrmListadoAdopciones>();
+        }
 
-                    hijo.Activate();
-                    return;
-                }
-            }
+        private void listadoDeAdopcionesToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            AbrirFormularioUnico<FrmListadoAdopciones>();
+        }
 
-            Form1 f1 = new Form1();
-            f1.MdiParent = this;
-            f1.Show();
+        private void registrarAdopciónToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AbrirFormularioUnico<FrmRegistroAdopcion>();
+        }
+
+        private void registroDeAdoptantesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AbrirFormularioUnico<FrmAdoptantes>();
+        }
+
+        private void historialMedicoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AbrirFormularioUnico<FrmHistorialMedico>();
         }
 
         private void módulosToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
         }
 
+        // ============================================================================
         // EVENTO DE ARRANQUE (CARGA DE SESIÓN Y SEGURIDAD POR ROLES)
+        // ============================================================================
         private void FrmPrincipalMDI_Load(object sender, EventArgs e)
         {
             // 1. Cargamos datos de la sesión estática en el StatusStrip
@@ -111,21 +120,14 @@ namespace SistemaRescateAnimalUI
             // 2. Evaluamos el rol del usuario autenticado para restringir accesos
             if (SesionSistema.RolActivo == "Operador")
             {
-                // El Operador no puede ver el Módulo Secundario
-                móduloSecundarioToolStripMenuItem.Visible = false;
+                // El Operador no tiene acceso al Historial Médico
+                historialMedicoToolStripMenuItem.Visible = false;
             }
             else if (SesionSistema.RolActivo == "Invitado")
             {
                 // El Invitado no tiene acceso a las opciones del menú Módulos
                 módulosToolStripMenuItem.Enabled = false;
             }
-        }
-
-        private void listadoDeAdopcionesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            FrmListadoAdopciones frmListado = new FrmListadoAdopciones();
-            frmListado.MdiParent = this; // Le decimos que el MDI es su padre
-            frmListado.Show();
         }
     }
 }

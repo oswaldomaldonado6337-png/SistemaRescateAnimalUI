@@ -409,7 +409,11 @@ namespace SistemaRescateAnimalUI
                 return;
             }
 
-            string idFinal = string.IsNullOrWhiteSpace(txtIdBusqueda.Text) ? _contadorId.ToString() : txtIdBusqueda.Text;
+            // AQUI ESTÁ EL CAMBIO: Pregunta a MariaDB cuál es el siguiente ID si el campo de búsqueda está vacío
+            string idFinal = string.IsNullOrWhiteSpace(txtIdBusqueda.Text)
+                             ? _animalDAO.ObtenerSiguienteIdNumerico()
+                             : txtIdBusqueda.Text.Trim();
+
             string nombreArchivoFinal = "";
 
             // Copia física de la imagen usando System.IO con manejo de excepciones
@@ -469,8 +473,6 @@ namespace SistemaRescateAnimalUI
                 _animalDAO.RegistrarAnimal(animal);
                 txtIdBusqueda.Text = idFinal;
 
-                if (idFinal == _contadorId.ToString()) _contadorId++;
-
                 MessageBox.Show($"Animal '{animal.Nombre}' guardado correctamente con ID: {animal.Id}", "Sistema", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 errorProvider1.Clear();
@@ -488,7 +490,7 @@ namespace SistemaRescateAnimalUI
             }
         }
 
-        
+
 
         private void txtEspecie_TextChanged(object sender, EventArgs e)
         {

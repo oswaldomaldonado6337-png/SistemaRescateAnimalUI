@@ -241,5 +241,31 @@ namespace SistemaRescateAnimal.Datos
 
             return dtAdopciones;
         }
+        public string ObtenerSiguienteIdNumerico()
+        {
+            int siguienteId = 101; // este es el valor inicial si la tabla esta vacia
+            MySqlConnection conexion = _conexionMariaDB.ObtenerConexion();
+
+            // Aqui buscamos el numero mas alto entre los registros Numericos  
+            string query = "SELECT MAX(CAST(IdAnimal AS UNSIGNED)) FROM animales WHERE IdAnimal REGEXP '^[0-9]+$'";
+
+            using (MySqlCommand comando = new MySqlCommand(query, conexion))
+            {
+                try
+                {
+                    object resultado = comando.ExecuteScalar();
+                    if (resultado != null && resultado != DBNull.Value)
+                    {
+                        siguienteId = Convert.ToInt32(resultado) + 1;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error al calcular el siguiente ID: " + ex.Message);
+                }
+            }
+
+            return siguienteId.ToString();
+        }
     }
 }

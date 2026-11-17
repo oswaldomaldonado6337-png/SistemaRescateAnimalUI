@@ -22,11 +22,27 @@ namespace SistemaRescateAnimalUI.Data
         {
             try
             {
+                // si la conexion llega nula creamos una nueva
                 if (_conexionActiva == null)
                 {
                     _conexionActiva = new MySqlConnection(cadenaConexion);
                 }
+                else
+                {
+                    // verificamos que no haya sido borrada
+                    //para el error de cuando estaba siendo borrada la conexion
+                    try
+                    {
+                        var estado = _conexionActiva.State;
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // si la conexion fue borrada creamos una nueva
+                        _conexionActiva = new MySqlConnection(cadenaConexion);
+                    }
+                }
 
+                // Si el puerto de red está cerrado, lo abrimos
                 if (_conexionActiva.State == ConnectionState.Closed)
                 {
                     _conexionActiva.Open();
@@ -34,7 +50,6 @@ namespace SistemaRescateAnimalUI.Data
 
                 return _conexionActiva;
             }
-
             catch (MySqlException ex)
             {
                 throw new Exception("Falla de red o credenciales en MariaDB: " + ex.Message);

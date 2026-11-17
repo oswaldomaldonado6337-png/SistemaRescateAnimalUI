@@ -36,12 +36,15 @@
             menuStrip1 = new MenuStrip();
             módulosToolStripMenuItem = new ToolStripMenuItem();
             gestiónDeAnimalesToolStripMenuItem = new ToolStripMenuItem();
-            móduloSecundarioToolStripMenuItem = new ToolStripMenuItem();
+            historialMedicoToolStripMenuItem = new ToolStripMenuItem();
+            adopcionesToolStripMenuItem = new ToolStripMenuItem();
+            registroDeAdoptantesToolStripMenuItem = new ToolStripMenuItem();
+            listadoDeAdopcionesToolStripMenuItem = new ToolStripMenuItem();
+            registrarAdopciónToolStripMenuItem = new ToolStripMenuItem();
             ventanaToolStripMenuItem1 = new ToolStripMenuItem();
             cascadaToolStripMenuItem1 = new ToolStripMenuItem();
             mosaicoVerticalToolStripMenuItem1 = new ToolStripMenuItem();
             mosaicoHorizontalToolStripMenuItem1 = new ToolStripMenuItem();
-            listadoDeAdopcionesToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -83,7 +86,7 @@
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(24, 24);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { módulosToolStripMenuItem, ventanaToolStripMenuItem1 });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { módulosToolStripMenuItem, adopcionesToolStripMenuItem, ventanaToolStripMenuItem1 });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.MdiWindowListItem = módulosToolStripMenuItem;
             menuStrip1.Name = "menuStrip1";
@@ -93,25 +96,53 @@
             // 
             // módulosToolStripMenuItem
             // 
-            módulosToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { gestiónDeAnimalesToolStripMenuItem, móduloSecundarioToolStripMenuItem, listadoDeAdopcionesToolStripMenuItem });
+            módulosToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { gestiónDeAnimalesToolStripMenuItem, historialMedicoToolStripMenuItem });
             módulosToolStripMenuItem.Name = "módulosToolStripMenuItem";
-            módulosToolStripMenuItem.Size = new Size(99, 29);
-            módulosToolStripMenuItem.Text = "Módulos";
+            módulosToolStripMenuItem.Size = new Size(100, 29);
+            módulosToolStripMenuItem.Text = "Animales";
             módulosToolStripMenuItem.Click += módulosToolStripMenuItem_Click;
             // 
             // gestiónDeAnimalesToolStripMenuItem
             // 
             gestiónDeAnimalesToolStripMenuItem.Name = "gestiónDeAnimalesToolStripMenuItem";
-            gestiónDeAnimalesToolStripMenuItem.Size = new Size(296, 34);
+            gestiónDeAnimalesToolStripMenuItem.Size = new Size(276, 34);
             gestiónDeAnimalesToolStripMenuItem.Text = "Gestión de Animales";
             gestiónDeAnimalesToolStripMenuItem.Click += gestiónDeAnimalesToolStripMenuItem_Click;
             // 
-            // móduloSecundarioToolStripMenuItem
+            // historialMedicoToolStripMenuItem
             // 
-            móduloSecundarioToolStripMenuItem.Name = "móduloSecundarioToolStripMenuItem";
-            móduloSecundarioToolStripMenuItem.Size = new Size(296, 34);
-            móduloSecundarioToolStripMenuItem.Text = "Módulo Secundario";
-            móduloSecundarioToolStripMenuItem.Click += móduloSecundarioToolStripMenuItem_Click;
+            historialMedicoToolStripMenuItem.Name = "historialMedicoToolStripMenuItem";
+            historialMedicoToolStripMenuItem.Size = new Size(276, 34);
+            historialMedicoToolStripMenuItem.Text = "Historial Médico";
+            historialMedicoToolStripMenuItem.Click += historialMedicoToolStripMenuItem_Click;
+            // 
+            // adopcionesToolStripMenuItem
+            // 
+            adopcionesToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { registroDeAdoptantesToolStripMenuItem, listadoDeAdopcionesToolStripMenuItem, registrarAdopciónToolStripMenuItem });
+            adopcionesToolStripMenuItem.Name = "adopcionesToolStripMenuItem";
+            adopcionesToolStripMenuItem.Size = new Size(123, 29);
+            adopcionesToolStripMenuItem.Text = "Adopciones";
+            // 
+            // registroDeAdoptantesToolStripMenuItem
+            // 
+            registroDeAdoptantesToolStripMenuItem.Name = "registroDeAdoptantesToolStripMenuItem";
+            registroDeAdoptantesToolStripMenuItem.Size = new Size(302, 34);
+            registroDeAdoptantesToolStripMenuItem.Text = "Registro de Adoptantes";
+            registroDeAdoptantesToolStripMenuItem.Click += registroDeAdoptantesToolStripMenuItem_Click;
+            // 
+            // listadoDeAdopcionesToolStripMenuItem
+            // 
+            listadoDeAdopcionesToolStripMenuItem.Name = "listadoDeAdopcionesToolStripMenuItem";
+            listadoDeAdopcionesToolStripMenuItem.Size = new Size(302, 34);
+            listadoDeAdopcionesToolStripMenuItem.Text = "Listado de Adopciones";
+            listadoDeAdopcionesToolStripMenuItem.Click += listadoDeAdopcionesToolStripMenuItem_Click_1;
+            // 
+            // registrarAdopciónToolStripMenuItem
+            // 
+            registrarAdopciónToolStripMenuItem.Name = "registrarAdopciónToolStripMenuItem";
+            registrarAdopciónToolStripMenuItem.Size = new Size(302, 34);
+            registrarAdopciónToolStripMenuItem.Text = "Registrar Adopción";
+            registrarAdopciónToolStripMenuItem.Click += registrarAdopciónToolStripMenuItem_Click;
             // 
             // ventanaToolStripMenuItem1
             // 
@@ -141,13 +172,6 @@
             mosaicoHorizontalToolStripMenuItem1.Text = "Mosaico Horizontal";
             mosaicoHorizontalToolStripMenuItem1.Click += mosaicoHorizontalToolStripMenuItem1_Click;
             // 
-            // listadoDeAdopcionesToolStripMenuItem
-            // 
-            listadoDeAdopcionesToolStripMenuItem.Name = "listadoDeAdopcionesToolStripMenuItem";
-            listadoDeAdopcionesToolStripMenuItem.Size = new Size(296, 34);
-            listadoDeAdopcionesToolStripMenuItem.Text = "Listado de Adopciones";
-            listadoDeAdopcionesToolStripMenuItem.Click += listadoDeAdopcionesToolStripMenuItem_Click;
-            // 
             // FrmPrincipalMDI
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -158,7 +182,8 @@
             IsMdiContainer = true;
             MainMenuStrip = menuStrip1;
             Name = "FrmPrincipalMDI";
-            Text = "FrmPrincipalMDI";
+            Text = "Sistema de Rescate Animal";
+            WindowState = FormWindowState.Maximized;
             Load += FrmPrincipalMDI_Load;
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
@@ -179,10 +204,13 @@
         private ToolStripMenuItem cascadaToolStripMenuItem1;
         private ToolStripMenuItem mosaicoVerticalToolStripMenuItem1;
         private ToolStripMenuItem mosaicoHorizontalToolStripMenuItem1;
-        private ToolStripMenuItem móduloSecundarioToolStripMenuItem;
+        private ToolStripMenuItem historialMedicoToolStripMenuItem;
         private ToolStripStatusLabel lblUsuario;
         private ToolStripStatusLabel lblRol;
         private ToolStripStatusLabel lblHora;
+        private ToolStripMenuItem adopcionesToolStripMenuItem;
+        private ToolStripMenuItem registroDeAdoptantesToolStripMenuItem;
         private ToolStripMenuItem listadoDeAdopcionesToolStripMenuItem;
+        private ToolStripMenuItem registrarAdopciónToolStripMenuItem;
     }
 }
