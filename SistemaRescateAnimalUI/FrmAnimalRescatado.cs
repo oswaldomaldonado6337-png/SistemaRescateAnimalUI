@@ -28,6 +28,7 @@ namespace SistemaRescateAnimalUI
         private static int _contadorId = 101;
         private ErrorProvider errorProvider1 = new ErrorProvider();
         private string rutaImagenTemporal = "";
+        private string rutaImagenActualDB = "";
 
         // Estructura de datos Pila (Actividad 2.5)
         private AnimalHistorial historialPila = new AnimalHistorial();
@@ -189,18 +190,43 @@ namespace SistemaRescateAnimalUI
         {
             using (OpenFileDialog dialog = new OpenFileDialog())
             {
-                dialog.Filter = "Archivos de imagen (.jpg, .png)|*.jpg;*.png";
+                dialog.Filter = "Archivos de imagen (.jpg, .jpeg, .png)|*.jpg;*.jpeg;*.png";
                 dialog.Title = "Seleccionar fotografía del animal";
 
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    // Conservamos tu variable
-                    rutaImagenTemporal = dialog.FileName;
-
-                    // Carga segura exigida por la rúbrica (evita el bloqueo del archivo)
-                    using (System.IO.FileStream stream = new System.IO.FileStream(rutaImagenTemporal, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+                    try
                     {
-                        pbxFotografia.Image = Image.FromStream(stream);
+                        // Liberamos la imagen previe en el PictureBox
+                        if (pbxFotografia.Image != null)
+                        {
+                            pbxFotografia.Image.Dispose();
+                            pbxFotografia.Image = null;
+                        }
+
+                        //  se tiene que leer los bytes en memoria para evitar errores
+                        byte[] bytesImagen = File.ReadAllBytes(dialog.FileName);
+                        using (MemoryStream ms = new MemoryStream(bytesImagen))
+                        {
+                            using (Image imgTemp = Image.FromStream(ms))
+                            {
+                                pbxFotografia.Image = new Bitmap(imgTemp);
+                            }
+                        }
+
+                        // Solo guardamos la imagen si todo procedio correctamente
+                        rutaImagenTemporal = dialog.FileName;
+                    }
+                    catch (ArgumentException)
+                    {
+                        rutaImagenTemporal = "";
+                        MessageBox.Show("El archivo seleccionado no es una imagen JPG o PNG válida (puede estar corrupto o en formato WebP). Intenta con otra fotografía.",
+                                        "Formato no soportado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    catch (Exception ex)
+                    {
+                        rutaImagenTemporal = "";
+                        MessageBox.Show($"Error al cargar la imagen: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
@@ -514,27 +540,102 @@ namespace SistemaRescateAnimalUI
 
         public void EjecutarActualizar()
         {
-            if (string.IsNullOrWhiteSpace(txtNombre.Text) || string.IsNullOrWhiteSpace(txtEspecie.Text))
+            if (string.IsNullOrWhiteSpace(txtIdBusqueda.Text))
             {
-                MessageBox.Show("Corrija los errores antes de actualizar.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Primero busque un registro válido por su ID para poder editarlo.", "ID requerido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtNombre.Text) ||
+                string.IsNullOrWhiteSpace(txtEspecie.Text) ||
+                !double.TryParse(numPeso.Text, out double pVal) || pVal <= 0)
+            {
+                MessageBox.Show("Corrija los errores (campos obligatorios y peso mayor a 0) antes de actualizar.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string rutaRelativaFinal = rutaImagenActualDB;
+
+            // en caso de que el usuario haya cargado una nueva imagen
+            if (!string.IsNullOrEmpty(rutaImagenTemporal))
+            {
+                try
+                {
+                    string rutaBase = AppDomain.CurrentDomain.BaseDirectory;
+                    string carpetaDestino = Path.Combine(rutaBase, "ImagenesDatos");
+
+                    if (!Directory.Exists(carpetaDestino))
+                    {
+                        Directory.CreateDirectory(carpetaDestino);
+                    }
+
+                    string extension = Path.GetExtension(rutaImagenTemporal);
+                    string nuevoNombre = Guid.NewGuid().ToString() + extension;
+                    string rutaNuevaCompleta = Path.Combine(carpetaDestino, nuevoNombre);
+
+                    // se copea la nueva imagen
+                    File.Copy(rutaImagenTemporal, rutaNuevaCompleta, true);
+
+                    // borramos la imagen vieja  y liberamos el PictureBox
+                    if (!string.IsNullOrEmpty(rutaImagenActualDB))
+                    {
+                        if (pbxFotografia.Image != null)
+                        {
+                            pbxFotografia.Image.Dispose();
+                            pbxFotografia.Image = null;
+                        }
+
+                        string rutaAnteriorCompleta = Path.Combine(rutaBase, rutaImagenActualDB);
+                        if (File.Exists(rutaAnteriorCompleta))
+                        {
+                            File.Delete(rutaAnteriorCompleta);
+                        }
+                    }
+
+                    rutaRelativaFinal = Path.Combine("ImagenesDatos", nuevoNombre);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error al actualizar la imagen física: {ex.Message}", "Error de archivo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
             }
 
             try
             {
                 AnimalRescatado animal = new AnimalRescatado
                 {
-                    Id = txtIdBusqueda.Text,
+                    Id = txtIdBusqueda.Text.Trim(),
                     Nombre = txtNombre.Text.Trim(),
                     Especie = txtEspecie.Text.Trim(),
-                    Peso = double.TryParse(numPeso.Text, out double p) ? p : 0.0,
+                    Peso = double.Parse(numPeso.Text),
                     FechaRegistro = dtpFechaRegistro.Value,
-                    EsActivo = chkEsActivo.Checked
+                    EsActivo = chkEsActivo.Checked,
+                    RutaImagen = rutaRelativaFinal
                 };
 
-                _modeloAnimal.ActualizarRegistro(animal);
-                MessageBox.Show("Registro actualizado correctamente.", "Sistema", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LimpiarFormulario();
+                // Actualización simultánea en MariaDB y MongoDB Atlas
+                bool actMaria = _animalDAO.ActualizarAnimal(animal);
+                bool actMongo = _animalDAO.ActualizarAnimalMongo(animal);
+
+                if (actMaria && actMongo)
+                {
+                    rutaImagenActualDB = "";
+                    rutaImagenTemporal = "";
+
+                    MessageBox.Show($"Registro ID {animal.Id} actualizado correctamente en MariaDB y MongoDB.", "Sistema", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LimpiarFormulario();
+
+                    if (pbxFotografia.Image != null)
+                    {
+                        pbxFotografia.Image.Dispose();
+                        pbxFotografia.Image = null;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("No se encontró el registro en una o ambas bases de datos.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
             catch (Exception ex)
             {
@@ -748,8 +849,7 @@ namespace SistemaRescateAnimalUI
 
                     if (datosRecuperados != null)
                     {
-                        // Si decides mostrar los datos recuperados en tu pantalla, 
-                        // aquí puedes asignarlos a un DataGridView o ListBox
+                        
                         MessageBox.Show("Datos restaurados con éxito.", "Importación completada", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
@@ -757,7 +857,7 @@ namespace SistemaRescateAnimalUI
         }
         public void EjecutarBuscar(string id, ErrorProvider alerta)
         {
-            // 1. Configuramos y limpiamos las alertas visuales
+            // Con esto se configuran y limpian las alertas visuales
             errorProvider1.SetIconAlignment(txtIdBusqueda, ErrorIconAlignment.MiddleLeft);
             errorProvider1.SetIconPadding(txtIdBusqueda, 5);
 
@@ -769,7 +869,7 @@ namespace SistemaRescateAnimalUI
             }
             errorProvider1.SetError(txtIdBusqueda, "");
 
-            // 2. Validamos que no esté vacío
+            // validamos que no este vacio id
             if (string.IsNullOrWhiteSpace(id))
             {
                 string msjVacio = "Ingrese un ID válido para buscar.";
@@ -779,7 +879,7 @@ namespace SistemaRescateAnimalUI
                 return;
             }
 
-            // 3. Validamos que no tenga símbolos raros
+            // validamos que no tenga ningun simbolo extraño o raro
             foreach (char c in id)
             {
                 if (!char.IsLetterOrDigit(c))
@@ -796,20 +896,42 @@ namespace SistemaRescateAnimalUI
                 }
             }
 
-            // 4. Búsqueda en la Base de Datos (MariaDB) usando tu DAO
+            // lo buscamos en la db (mariadb)
             try
             {
                 var resultado = _animalDAO.ObtenerPorId(id);
 
                 if (resultado != null)
                 {
-                    // Llenamos el formulario con lo que trajimos de la BD
+                    // llenamos el formulario con la info que ya tenemos
                     txtIdBusqueda.Text = resultado.Id;
                     txtNombre.Text = resultado.Nombre;
                     txtEspecie.Text = resultado.Especie;
                     numPeso.Text = resultado.Peso.ToString();
                     dtpFechaRegistro.Value = resultado.FechaRegistro;
                     chkEsActivo.Checked = resultado.EsActivo;
+
+                    // guardamos la ruta actual de la imagen y la mostramos
+                    rutaImagenActualDB = resultado.RutaImagen ?? "";
+                    rutaImagenTemporal = "";
+
+                    if (pbxFotografia.Image != null)
+                    {
+                        pbxFotografia.Image.Dispose();
+                        pbxFotografia.Image = null;
+                    }
+
+                    if (!string.IsNullOrEmpty(rutaImagenActualDB))
+                    {
+                        string rutaFisica = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, rutaImagenActualDB);
+                        if (File.Exists(rutaFisica))
+                        {
+                            using (FileStream stream = new FileStream(rutaFisica, FileMode.Open, FileAccess.Read))
+                            {
+                                pbxFotografia.Image = Image.FromStream(stream);
+                            }
+                        }
+                    }
 
                     errorProvider1.Clear();
                     if (alerta != null) alerta.Clear();
@@ -820,6 +942,12 @@ namespace SistemaRescateAnimalUI
                 {
                     LimpiarFormulario();
                     txtIdBusqueda.Text = id;
+                    rutaImagenActualDB = "";
+                    if (pbxFotografia.Image != null)
+                    {
+                        pbxFotografia.Image.Dispose();
+                        pbxFotografia.Image = null;
+                    }
                     MessageBox.Show($"No existe ningún registro guardado con el ID: '{id}'.", "Sin resultados", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
             }

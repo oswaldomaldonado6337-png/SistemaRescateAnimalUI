@@ -300,5 +300,66 @@ namespace SistemaRescateAnimal.Datos
 
             return siguienteId.ToString();
         }
+        public bool ActualizarAnimal(AnimalRescatado animal)
+        {
+            MySqlConnection conexion = _conexionMariaDB.ObtenerConexion();
+
+            string query = @"UPDATE animales 
+                     SET Nombre = @nombre, 
+                         Especie = @especie, 
+                         Peso = @peso, 
+                         FechaRegistro = @fechaReg, 
+                         EsActivo = @activo, 
+                         RutaImagen = @ruta 
+                     WHERE IdAnimal = @id;";
+
+            using (MySqlCommand comando = new MySqlCommand(query, conexion))
+            {
+                comando.Parameters.AddWithValue("@id", animal.Id);
+                comando.Parameters.AddWithValue("@nombre", animal.Nombre);
+                comando.Parameters.AddWithValue("@especie", animal.Especie);
+                comando.Parameters.AddWithValue("@peso", animal.Peso);
+                comando.Parameters.AddWithValue("@fechaReg", animal.FechaRegistro);
+                comando.Parameters.AddWithValue("@activo", animal.EsActivo);
+                comando.Parameters.AddWithValue("@ruta", animal.RutaImagen);
+
+                try
+                {
+                    return comando.ExecuteNonQuery() > 0;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error DAO Actualización MariaDB: " + ex.Message);
+                }
+            }
+        }
+
+        
+        public bool ActualizarAnimalMongo(AnimalRescatado animal)
+        {
+            try
+            {
+                ConexionMongoDB conexionMongo = new ConexionMongoDB();
+                var database = conexionMongo.ObtenerBaseDatos();
+                var coleccion = database.GetCollection<BsonDocument>("animales");
+
+                var filtro = Builders<BsonDocument>.Filter.Eq("IdAnimal", animal.Id);
+
+                var actualizacion = Builders<BsonDocument>.Update
+                    .Set("Nombre", animal.Nombre)
+                    .Set("Especie", animal.Especie)
+                    .Set("Peso", animal.Peso)
+                    .Set("FechaRegistro", animal.FechaRegistro)
+                    .Set("EsActivo", animal.EsActivo)
+                    .Set("RutaImagen", animal.RutaImagen ?? "");
+
+                var resultado = coleccion.UpdateOne(filtro, actualizacion);
+                return resultado.MatchedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error DAO Actualización MongoDB: " + ex.Message);
+            }
+        }
     }
 }
