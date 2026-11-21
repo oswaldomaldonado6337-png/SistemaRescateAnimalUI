@@ -100,7 +100,7 @@ namespace SistemaRescateAnimal.Datos
             AnimalRescatado animal = null;
             MySqlConnection conexion = _conexionMariaDB.ObtenerConexion();
 
-            string query = "SELECT * FROM animales WHERE IdAnimal = @id";
+            string query = "SELECT * FROM animales WHERE IdAnimal = @id AND EsActivo = 1;";
 
             using (MySqlCommand comando = new MySqlCommand(query, conexion))
             {
@@ -359,6 +359,90 @@ namespace SistemaRescateAnimal.Datos
             catch (Exception ex)
             {
                 throw new Exception("Error DAO Actualización MongoDB: " + ex.Message);
+            }
+        }
+
+
+      
+        public bool BorradoLogicoMariaDB(string idAnimal)
+        {
+            MySqlConnection conexion = _conexionMariaDB.ObtenerConexion();
+            string query = "UPDATE animales SET EsActivo = 0 WHERE IdAnimal = @id;";
+
+            using (MySqlCommand comando = new MySqlCommand(query, conexion))
+            {
+                comando.Parameters.AddWithValue("@id", idAnimal);
+                try
+                {
+                    return comando.ExecuteNonQuery() > 0;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error DAO Borrado Lógico MariaDB: " + ex.Message);
+                }
+            }
+        }
+
+        
+        public bool BorradoLogicoMongoDB(string idAnimal)
+        {
+            try
+            {
+                ConexionMongoDB conexionMongo = new ConexionMongoDB();
+                var database = conexionMongo.ObtenerBaseDatos();
+                var coleccion = database.GetCollection<BsonDocument>("animales");
+
+                var filtro = Builders<BsonDocument>.Filter.Eq("IdAnimal", idAnimal);
+                var actualizacion = Builders<BsonDocument>.Update.Set("EsActivo", false);
+
+                var resultado = coleccion.UpdateOne(filtro, actualizacion);
+                return resultado.MatchedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error DAO Borrado Lógico MongoDB: " + ex.Message);
+            }
+        }
+
+        
+        public bool BorradoFisicoMariaDB(string idAnimal)
+        {
+            MySqlConnection conexion = _conexionMariaDB.ObtenerConexion();
+            string query = "DELETE FROM animales WHERE IdAnimal = @id;";
+
+            using (MySqlCommand comando = new MySqlCommand(query, conexion))
+            {
+                comando.Parameters.AddWithValue("@id", idAnimal);
+                try
+                {
+                    return comando.ExecuteNonQuery() > 0;
+                }
+                catch (MySqlException ex) when (ex.Number == 1451)
+                {
+                    throw new Exception("No se puede eliminar físicamente este animal porque tiene adopciones o registros vinculados (Integridad Referencial). Use Borrado Lógico en su lugar.");
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error DAO Borrado Físico MariaDB: " + ex.Message);
+                }
+            }
+        }
+
+        public bool BorradoFisicoMongoDB(string idAnimal)
+        {
+            try
+            {
+                ConexionMongoDB conexionMongo = new ConexionMongoDB();
+                var database = conexionMongo.ObtenerBaseDatos();
+                var coleccion = database.GetCollection<BsonDocument>("animales");
+
+                var filtro = Builders<BsonDocument>.Filter.Eq("IdAnimal", idAnimal);
+                var resultado = coleccion.DeleteOne(filtro);
+                return resultado.DeletedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error DAO Borrado Físico MongoDB: " + ex.Message);
             }
         }
     }

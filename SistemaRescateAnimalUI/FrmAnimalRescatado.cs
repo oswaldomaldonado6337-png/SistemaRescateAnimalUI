@@ -647,7 +647,7 @@ namespace SistemaRescateAnimalUI
         {
             try
             {
-                string idAEliminar = txtIdBusqueda.Text;
+                string idAEliminar = txtIdBusqueda.Text.Trim();
 
                 if (string.IsNullOrWhiteSpace(idAEliminar))
                 {
@@ -655,31 +655,84 @@ namespace SistemaRescateAnimalUI
                     return;
                 }
 
-                DialogResult respuesta = MessageBox.Show(
-                    $"¿Está seguro de que desea eliminar el registro con ID '{idAEliminar}'?",
-                    "Confirmación de Eliminación",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question
-                );
+                // se Recupera el objeto completo desde la BD 
+                AnimalRescatado animal = _animalDAO.ObtenerPorId(idAEliminar);
 
-                if (respuesta == DialogResult.No)
+                if (animal == null)
                 {
+                    MessageBox.Show($"No se encontró ningún registro con el ID '{idAEliminar}'.", "Sin resultados", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                _modeloAnimal.EliminarRegistro(idAEliminar);
-
-                if (barraEstado != null)
+                // abirmos la ventana para doble confirmacion ( Yes/No)
+                using (FrmDetalleEliminacion modal = new FrmDetalleEliminacion(animal))
                 {
-                    if (barraEstado.Items.Count == 0)
+                    if (modal.ShowDialog(this) != DialogResult.OK)
                     {
-                        barraEstado.Items.Add("Listo");
+                        return; // El usuario presionó Cancelar o dijo "No" 
                     }
-                    barraEstado.Items[0].Text = $"Registro {idAEliminar} eliminado.";
-                }
 
-                MessageBox.Show($"Registro con ID {idAEliminar} eliminado.", "Sistema", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LimpiarFormulario();
+                    if (modal.OpcionSeleccionada == FrmDetalleEliminacion.TipoBorrado.Logico)
+                    {
+                        // BORRADO LÓGICO 
+                        bool logMaria = _animalDAO.BorradoLogicoMariaDB(idAEliminar);
+                        bool logMongo = _animalDAO.BorradoLogicoMongoDB(idAEliminar);
+
+                        if (logMaria && logMongo)
+                        {
+                            if (barraEstado != null)
+                            {
+                                if (barraEstado.Items.Count == 0) barraEstado.Items.Add("Listo");
+                                barraEstado.Items[0].Text = $"Borrado lógico aplicado al registro {idAEliminar}.";
+                            }
+
+                            MessageBox.Show($"Borrado Lógico aplicado al ID {idAEliminar} en MariaDB y MongoDB (EsActivo = 0).", "Borrado Lógico Exitoso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            LimpiarFormulario();
+                            if (pbxFotografia.Image != null) { pbxFotografia.Image.Dispose(); pbxFotografia.Image = null; }
+                            rutaImagenActualDB = "";
+                        }
+                    }
+                    else if (modal.OpcionSeleccionada == FrmDetalleEliminacion.TipoBorrado.Fisico)
+                    {
+                        // BORRADO FÍSICO 
+                        string rutaImagenABorrar = animal.RutaImagen;
+
+                        bool fisMaria = _animalDAO.BorradoFisicoMariaDB(idAEliminar);
+                        bool fisMongo = _animalDAO.BorradoFisicoMongoDB(idAEliminar);
+
+                        if (fisMaria && fisMongo)
+                        {
+                            // Liberamos la imagen del formulario principal antes de borrar el archivo
+                            if (pbxFotografia.Image != null)
+                            {
+                                pbxFotografia.Image.Dispose();
+                                pbxFotografia.Image = null;
+                            }
+
+                            // Destrucción física de la imagen en disco
+                            if (!string.IsNullOrEmpty(rutaImagenABorrar))
+                            {
+                                string rutaCompleta = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, rutaImagenABorrar);
+                                if (File.Exists(rutaCompleta))
+                                {
+                                    File.Delete(rutaCompleta);
+                                }
+                            }
+
+                            rutaImagenActualDB = "";
+                            rutaImagenTemporal = "";
+                            LimpiarFormulario();
+
+                            if (barraEstado != null)
+                            {
+                                if (barraEstado.Items.Count == 0) barraEstado.Items.Add("Listo");
+                                barraEstado.Items[0].Text = $"Registro {idAEliminar} eliminado permanentemente.";
+                            }
+
+                            MessageBox.Show($"Registro ID {idAEliminar} y su fotografía fueron eliminados permanentemente de MariaDB, MongoDB y disco.", "Borrado Físico Exitoso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
