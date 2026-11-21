@@ -409,7 +409,7 @@ namespace SistemaRescateAnimalUI
                 return;
             }
 
-            // AQUI ESTÁ EL CAMBIO: Pregunta a MariaDB cuál es el siguiente ID si el campo de búsqueda está vacío
+            // Pregunta a MariaDB cuál es el siguiente ID si el campo de búsqueda está vacío
             string idFinal = string.IsNullOrWhiteSpace(txtIdBusqueda.Text)
                              ? _animalDAO.ObtenerSiguienteIdNumerico()
                              : txtIdBusqueda.Text.Trim();
@@ -459,30 +459,45 @@ namespace SistemaRescateAnimalUI
 
             try
             {
+                string rutaRelativa = string.IsNullOrEmpty(nombreArchivoFinal)
+                                      ? ""
+                                      : Path.Combine("ImagenesDatos", nombreArchivoFinal);
+
                 AnimalRescatado animal = new AnimalRescatado
                 {
                     Id = idFinal,
                     Nombre = txtNombre.Text.Trim(),
                     Especie = txtEspecie.Text.Trim(),
                     Peso = double.TryParse(numPeso.Text, out double p) ? p : 0.0,
+                    FechaNacimientoEstimada = DateTime.Now.AddYears(-1),
+                    UbicacionFisica = "Refugio Central",
+                    FechaRescate = dtpFechaRegistro.Value,
+                    LugarHallazgo = "Zona Metropolitana",
+                    CondicionHallazgo = "Estable",
                     FechaRegistro = dtpFechaRegistro.Value,
                     EsActivo = chkEsActivo.Checked,
-                    RutaImagen = nombreArchivoFinal
+                    RutaImagen = rutaRelativa
                 };
 
-                _animalDAO.RegistrarAnimal(animal);
-                txtIdBusqueda.Text = idFinal;
+                // Guardado simultáneo en MariaDB y MongoDB Atlas
+                bool guardadoMaria = _animalDAO.RegistrarAnimal(animal);
+                bool guardadoMongo = _animalDAO.RegistrarAnimalMongo(animal);
 
-                MessageBox.Show($"Animal '{animal.Nombre}' guardado correctamente con ID: {animal.Id}", "Sistema", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                errorProvider1.Clear();
-                LimpiarFormulario();
-
-                if (pbxFotografia != null)
+                if (guardadoMaria && guardadoMongo)
                 {
-                    pbxFotografia.Image = null;
+                    txtIdBusqueda.Text = idFinal;
+
+                    MessageBox.Show($"Animal '{animal.Nombre}' guardado en MariaDB y MongoDB con ID: {animal.Id}", "Persistencia Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    errorProvider1.Clear();
+                    LimpiarFormulario();
+
+                    if (pbxFotografia != null)
+                    {
+                        pbxFotografia.Image = null;
+                    }
+                    rutaImagenTemporal = "";
                 }
-                rutaImagenTemporal = "";
             }
             catch (Exception ex)
             {

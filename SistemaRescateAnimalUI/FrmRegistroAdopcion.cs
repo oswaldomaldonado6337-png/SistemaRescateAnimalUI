@@ -60,13 +60,12 @@ namespace SistemaRescateAnimalUI
 
             try
             {
-                if (_adopcionDAO.RegistrarAdopcion(nuevaAdopcion))
+                if (_adopcionDAO.RegistrarAdopcion(nuevaAdopcion) && _adopcionDAO.RegistrarAdopcionMongo(nuevaAdopcion))
                 {
-                    MessageBox.Show("¡Adopción registrada con éxito!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("¡Adopción registrada con éxito en MariaDB y MongoDB!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     CargarCombos();
 
-                    // Limpiamos los campos automáticamente tras guardar
                     cmbAnimal.SelectedIndex = -1;
                     cmbAdoptante.SelectedIndex = -1;
                     dtpFechaAdopcion.Value = DateTime.Now;
@@ -78,6 +77,11 @@ namespace SistemaRescateAnimalUI
             {
                 MessageBox.Show(ex.Message, "Error al guardar", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void cmbAnimal_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

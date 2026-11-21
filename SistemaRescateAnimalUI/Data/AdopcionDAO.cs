@@ -3,6 +3,8 @@ using SistemaRescateAnimal.Models;
 using SistemaRescateAnimalUI.Data;
 using System;
 using System.Data;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace SistemaRescateAnimal.Datos
 {
@@ -101,6 +103,31 @@ namespace SistemaRescateAnimal.Datos
             }
 
             return exito;
+        }
+        public bool RegistrarAdopcionMongo(Adopcion adopcion)
+        {
+            try
+            {
+                ConexionMongoDB conexionMongo = new ConexionMongoDB();
+                var database = conexionMongo.ObtenerBaseDatos();
+                var coleccion = database.GetCollection<BsonDocument>("adopciones");
+
+                var documento = new BsonDocument
+        {
+            { "IdAdopcion", "ADP-" + DateTime.Now.ToString("yyyyMMddHHmmss") },
+            { "IdAnimal", adopcion.IdAnimal },         // Viene de cmbAnimal.SelectedValue
+            { "IdAdoptante", adopcion.IdAdoptante },   // Viene de cmbAdoptante.SelectedValue
+            { "FechaAdopcion", adopcion.FechaAdopcion },
+            { "Observaciones", adopcion.Observaciones ?? "" }
+        };
+
+                coleccion.InsertOne(documento);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error DAO MongoDB Inserción Adopción: " + ex.Message);
+            }
         }
 
         public DataTable ObtenerAdopcionesConDetalles()

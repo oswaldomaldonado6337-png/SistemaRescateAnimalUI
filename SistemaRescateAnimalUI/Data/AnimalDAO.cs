@@ -62,6 +62,39 @@ namespace SistemaRescateAnimal.Datos
 
             return exito;
         }
+
+        public bool RegistrarAnimalMongo(AnimalRescatado animal)
+        {
+            try
+            {
+                ConexionMongoDB conexionMongo = new ConexionMongoDB();
+                var database = conexionMongo.ObtenerBaseDatos();
+                var coleccion = database.GetCollection<BsonDocument>("animales");
+
+                var documento = new BsonDocument
+        {
+            { "IdAnimal", animal.Id },
+            { "Nombre", animal.Nombre },
+            { "Especie", animal.Especie },
+            { "Peso", animal.Peso },
+            { "FechaNacimientoEstimada", animal.FechaNacimientoEstimada },
+            { "UbicacionFisica", animal.UbicacionFisica ?? "Refugio Central" },
+            { "FechaRescate", animal.FechaRescate },
+            { "LugarHallazgo", animal.LugarHallazgo ?? "No especificado" },
+            { "CondicionHallazgo", animal.CondicionHallazgo ?? "Estable" },
+            { "FechaRegistro", animal.FechaRegistro },
+            { "EsActivo", animal.EsActivo },
+            { "RutaImagen", animal.RutaImagen ?? "" }
+        };
+
+                coleccion.InsertOne(documento);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error DAO MongoDB Inserción Animal: " + ex.Message);
+            }
+        }
         public AnimalRescatado ObtenerPorId(string id)
         {
             AnimalRescatado animal = null;

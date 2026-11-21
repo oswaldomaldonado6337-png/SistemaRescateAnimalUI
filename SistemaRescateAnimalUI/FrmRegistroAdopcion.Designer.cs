@@ -141,6 +141,7 @@
             cmbAnimal.Name = "cmbAnimal";
             cmbAnimal.Size = new Size(365, 36);
             cmbAnimal.TabIndex = 2;
+            cmbAnimal.SelectedIndexChanged += cmbAnimal_SelectedIndexChanged;
             // 
             // label2
             // 
