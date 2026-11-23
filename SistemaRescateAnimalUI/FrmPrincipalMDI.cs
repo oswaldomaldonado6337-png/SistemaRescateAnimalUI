@@ -129,5 +129,12 @@ namespace SistemaRescateAnimalUI
                 módulosToolStripMenuItem.Enabled = false;
             }
         }
+
+        private void carritoDeComprasToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FrmVentas frm = new FrmVentas();
+            frm.MdiParent = this;
+            frm.Show();
+        }
     }
 }
