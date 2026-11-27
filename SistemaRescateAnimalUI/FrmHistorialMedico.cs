@@ -64,12 +64,12 @@ namespace SistemaRescateAnimalUI
                 return;
             }
 
+            string idAnimalSeleccionado = cmbAnimal.SelectedValue.ToString();
+            bool darDeAlta = chkDarDeAlta.Checked;
+
             HistorialMedico nuevaConsulta = new HistorialMedico
             {
-                // Obtenemos el IdAnimal oculto del ComboBox
-                IdAnimal = cmbAnimal.SelectedValue.ToString(),
-                // Como aún no tenemos sesión de login activa globalmente,
-                // asignamos al veterinario "1" (Oswaldo Maldonado en tu tabla de usuarios)
+                IdAnimal = idAnimalSeleccionado,
                 IdUsuarioVeterinario = 1,
                 FechaConsulta = dtpFechaActualizacion.Value,
                 Diagnostico = txtEnfermedad.Text.Trim(),
@@ -80,7 +80,19 @@ namespace SistemaRescateAnimalUI
             {
                 if (_historialDAO.RegistrarConsulta(nuevaConsulta))
                 {
-                    MessageBox.Show("Consulta médica registrada con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    if (darDeAlta)
+                    {
+                        AnimalDAO animalDAO = new AnimalDAO();
+                        animalDAO.DarDeAltaMedica(idAnimalSeleccionado);
+                        MessageBox.Show("Consulta médica registrada y animal dado de alta médica (Estable / Disponible).",
+                                        "Alta Médica Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Consulta médica registrada con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+
+                    chkDarDeAlta.Checked = false;
                     LimpiarFormulario();
                     CargarGrid(); // Refresca el DGV con la nueva consulta
                 }

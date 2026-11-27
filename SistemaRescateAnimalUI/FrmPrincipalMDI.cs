@@ -117,16 +117,12 @@ namespace SistemaRescateAnimalUI
             lblRol.Text = "Perfil: " + SesionSistema.RolActivo;
             lblHora.Text = "Conexión: " + SesionSistema.HoraInicioSesion.ToString("HH:mm:ss");
 
-            // 2. Evaluamos el rol del usuario autenticado para restringir accesos
-            if (SesionSistema.RolActivo == "Operador")
+            // 2. Evaluamos el rol del usuario autenticado para restringir accesos 
+            if (SesionSistema.RolActivo == "Voluntario")
             {
-                // El Operador no tiene acceso al Historial Médico
+                // El Voluntario (Usuario Base) tiene restringido el historial médico y el módulo de ventas
                 historialMedicoToolStripMenuItem.Visible = false;
-            }
-            else if (SesionSistema.RolActivo == "Invitado")
-            {
-                // El Invitado no tiene acceso a las opciones del menú Módulos
-                módulosToolStripMenuItem.Enabled = false;
+                ventasToolStripMenuItem.Visible = false;
             }
         }
 
@@ -135,6 +131,34 @@ namespace SistemaRescateAnimalUI
             FrmVentas frm = new FrmVentas();
             frm.MdiParent = this;
             frm.Show();
+        }
+
+        private void cerrarSesiónToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DialogResult resp = MessageBox.Show(
+                "¿Deseas cerrar la sesión actual?",
+                "Cerrar Sesión",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (resp == DialogResult.Yes)
+            {
+                // Cierra cualquier ventana abierta
+                foreach (Form hijo in this.MdiChildren)
+                {
+                    hijo.Close();
+                }
+
+                // Limpia los datos de sesión 
+                SesionSistema.UsuarioActivo = string.Empty;
+                SesionSistema.RolActivo = string.Empty;
+
+                // Oculta todo y vuelve al inicio de sesion
+                this.Hide();
+                FrmLogin login = new FrmLogin();
+                login.FormClosed += (s, args) => this.Close();
+                login.Show();
+            }
         }
     }
 }

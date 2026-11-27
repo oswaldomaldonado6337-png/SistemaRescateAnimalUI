@@ -50,8 +50,20 @@
             btnExportarJSON = new Button();
             btnExportarXML = new Button();
             btnImportar = new Button();
+            dgvAnimales = new DataGridView();
+            dtpFechaNacimiento = new DateTimePicker();
+            label6 = new Label();
+            txtLugarHallazgo = new TextBox();
+            label7 = new Label();
+            cmbCondicionHallazgo = new ComboBox();
+            label8 = new Label();
+            txtUbicacionFisica = new TextBox();
+            btnMasterListar = new Button();
+            btnMasterCancelar = new Button();
+            label9 = new Label();
             ((System.ComponentModel.ISupportInitialize)numPeso).BeginInit();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvAnimales).BeginInit();
             SuspendLayout();
             // 
             // txtNombre
@@ -127,6 +139,8 @@
             chkEsActivo.TabIndex = 9;
             chkEsActivo.Text = "Esta Vacunado?";
             chkEsActivo.UseVisualStyleBackColor = true;
+            chkEsActivo.Visible = false;
+            chkEsActivo.CheckedChanged += chkEsActivo_CheckedChanged;
             // 
             // label5
             // 
@@ -206,49 +220,169 @@
             // 
             // btnTestConexion
             // 
-            btnTestConexion.Location = new Point(141, 489);
+            btnTestConexion.Location = new Point(12, 519);
             btnTestConexion.Name = "btnTestConexion";
             btnTestConexion.Size = new Size(262, 34);
             btnTestConexion.TabIndex = 18;
             btnTestConexion.Text = "Test Conexión";
             btnTestConexion.UseVisualStyleBackColor = true;
+            btnTestConexion.Visible = false;
             btnTestConexion.Click += button1_Click;
             // 
             // btnExportarJSON
             // 
-            btnExportarJSON.Location = new Point(786, 17);
+            btnExportarJSON.Location = new Point(12, 530);
             btnExportarJSON.Name = "btnExportarJSON";
             btnExportarJSON.Size = new Size(135, 34);
             btnExportarJSON.TabIndex = 19;
             btnExportarJSON.Text = "Exportar JSON";
             btnExportarJSON.UseVisualStyleBackColor = true;
+            btnExportarJSON.Visible = false;
             btnExportarJSON.Click += btnExportarJSON_Click;
             // 
             // btnExportarXML
             // 
-            btnExportarXML.Location = new Point(927, 17);
+            btnExportarXML.Location = new Point(56, 519);
             btnExportarXML.Name = "btnExportarXML";
             btnExportarXML.Size = new Size(130, 34);
             btnExportarXML.TabIndex = 20;
             btnExportarXML.Text = "Exportar XML";
             btnExportarXML.UseVisualStyleBackColor = true;
+            btnExportarXML.Visible = false;
             btnExportarXML.Click += btnExportarXML_Click;
             // 
             // btnImportar
             // 
-            btnImportar.Location = new Point(1072, 17);
+            btnImportar.Location = new Point(12, 519);
             btnImportar.Name = "btnImportar";
             btnImportar.Size = new Size(112, 34);
             btnImportar.TabIndex = 21;
             btnImportar.Text = "Importar";
             btnImportar.UseVisualStyleBackColor = true;
+            btnImportar.Visible = false;
             btnImportar.Click += btnImportar_Click;
+            // 
+            // dgvAnimales
+            // 
+            dgvAnimales.AllowUserToAddRows = false;
+            dgvAnimales.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dgvAnimales.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvAnimales.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvAnimales.Location = new Point(25, 320);
+            dgvAnimales.MultiSelect = false;
+            dgvAnimales.Name = "dgvAnimales";
+            dgvAnimales.ReadOnly = true;
+            dgvAnimales.RowHeadersWidth = 62;
+            dgvAnimales.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvAnimales.Size = new Size(1050, 235);
+            dgvAnimales.TabIndex = 24;
+            dgvAnimales.CellClick += dgvAnimales_CellContentClick;
+            // 
+            // dtpFechaNacimiento
+            // 
+            dtpFechaNacimiento.Format = DateTimePickerFormat.Short;
+            dtpFechaNacimiento.Location = new Point(671, 102);
+            dtpFechaNacimiento.Name = "dtpFechaNacimiento";
+            dtpFechaNacimiento.Size = new Size(155, 31);
+            dtpFechaNacimiento.TabIndex = 25;
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(480, 146);
+            label6.Name = "label6";
+            label6.Size = new Size(134, 25);
+            label6.TabIndex = 26;
+            label6.Text = "Lugar Hallazgo:";
+            // 
+            // txtLugarHallazgo
+            // 
+            txtLugarHallazgo.Location = new Point(671, 139);
+            txtLugarHallazgo.Name = "txtLugarHallazgo";
+            txtLugarHallazgo.Size = new Size(220, 31);
+            txtLugarHallazgo.TabIndex = 27;
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Location = new Point(484, 182);
+            label7.Name = "label7";
+            label7.Size = new Size(96, 25);
+            label7.TabIndex = 28;
+            label7.Text = "Condición:";
+            // 
+            // cmbCondicionHallazgo
+            // 
+            cmbCondicionHallazgo.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbCondicionHallazgo.FormattingEnabled = true;
+            cmbCondicionHallazgo.Location = new Point(671, 174);
+            cmbCondicionHallazgo.Name = "cmbCondicionHallazgo";
+            cmbCondicionHallazgo.Size = new Size(220, 33);
+            cmbCondicionHallazgo.TabIndex = 29;
+            cmbCondicionHallazgo.SelectedIndexChanged += cmbCondicionHallazgo_SelectedIndexChanged;
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Location = new Point(480, 225);
+            label8.Name = "label8";
+            label8.Size = new Size(148, 25);
+            label8.TabIndex = 30;
+            label8.Text = "Ubicación / Jaula:";
+            // 
+            // txtUbicacionFisica
+            // 
+            txtUbicacionFisica.Location = new Point(671, 213);
+            txtUbicacionFisica.Name = "txtUbicacionFisica";
+            txtUbicacionFisica.ReadOnly = true;
+            txtUbicacionFisica.Size = new Size(175, 31);
+            txtUbicacionFisica.TabIndex = 31;
+            // 
+            // btnMasterListar
+            // 
+            btnMasterListar.Location = new Point(786, 13);
+            btnMasterListar.Name = "btnMasterListar";
+            btnMasterListar.Size = new Size(96, 38);
+            btnMasterListar.TabIndex = 32;
+            btnMasterListar.Text = "Listar";
+            btnMasterListar.UseVisualStyleBackColor = true;
+            btnMasterListar.Click += btnMasterListar_Click;
+            // 
+            // btnMasterCancelar
+            // 
+            btnMasterCancelar.Location = new Point(888, 13);
+            btnMasterCancelar.Name = "btnMasterCancelar";
+            btnMasterCancelar.Size = new Size(108, 38);
+            btnMasterCancelar.TabIndex = 33;
+            btnMasterCancelar.Text = "Cancelar";
+            btnMasterCancelar.UseVisualStyleBackColor = true;
+            btnMasterCancelar.Click += btnMasterCancelar_Click;
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Location = new Point(480, 105);
+            label9.Name = "label9";
+            label9.Size = new Size(181, 25);
+            label9.TabIndex = 34;
+            label9.Text = "Nacimiento Estimado";
             // 
             // FrmAnimalRescatado
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1233, 590);
+            Controls.Add(label9);
+            Controls.Add(btnMasterCancelar);
+            Controls.Add(btnMasterListar);
+            Controls.Add(txtUbicacionFisica);
+            Controls.Add(label8);
+            Controls.Add(cmbCondicionHallazgo);
+            Controls.Add(label7);
+            Controls.Add(txtLugarHallazgo);
+            Controls.Add(label6);
+            Controls.Add(dtpFechaNacimiento);
+            Controls.Add(dgvAnimales);
             Controls.Add(btnImportar);
             Controls.Add(btnExportarXML);
             Controls.Add(btnExportarJSON);
@@ -274,8 +408,10 @@
             MinimizeBox = false;
             Name = "FrmAnimalRescatado";
             Text = "FrmAnimalRescatado";
+            Load += FrmAnimalRescatado_Load_1;
             ((System.ComponentModel.ISupportInitialize)numPeso).EndInit();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvAnimales).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -298,10 +434,21 @@
         private Button btnMasterGuardar;
         private Button btnMasterActualizar;
         private Button btnMasterEliminar;
-        private DataGridView dgvAnimales;
         private Button btnTestConexion;
         private Button btnExportarXML;
         private Button btnExportarJSON;
         private Button btnImportar;
+        private DataGridView dgvAnimales;
+        private ComboBox cmbCondicionHallazgo;
+        private Label label7;
+        private TextBox txtLugarHallazgo;
+        private Label label6;
+        private DateTimePicker dtpFechaNacimiento;
+        private Button btnMasterCancelar;
+        private Button btnMasterListar;
+        private TextBox txtUbicacionFisica;
+        private Label label8;
+        private Label label9;
+        //private DataGridView dgvAnimales;
     }
 }

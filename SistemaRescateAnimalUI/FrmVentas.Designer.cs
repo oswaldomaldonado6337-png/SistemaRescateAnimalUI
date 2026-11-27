@@ -132,6 +132,7 @@
             txtBuscarNombre.Size = new Size(150, 31);
             txtBuscarNombre.TabIndex = 4;
             txtBuscarNombre.Click += txtBuscarNombre_TextChanged;
+            txtBuscarNombre.TextChanged += txtBuscarNombre_TextChanged;
             // 
             // txtBuscarId
             // 

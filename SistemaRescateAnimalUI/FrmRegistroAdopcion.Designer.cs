@@ -30,6 +30,8 @@
         {
             label1 = new Label();
             grpAdopcion = new GroupBox();
+            numDonacion = new NumericUpDown();
+            label6 = new Label();
             btnGuardar = new Button();
             txtObservaciones = new TextBox();
             label5 = new Label();
@@ -39,7 +41,9 @@
             label3 = new Label();
             cmbAnimal = new ComboBox();
             label2 = new Label();
+            cmbFormaPago = new ComboBox();
             grpAdopcion.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numDonacion).BeginInit();
             SuspendLayout();
             // 
             // label1
@@ -54,6 +58,9 @@
             // 
             // grpAdopcion
             // 
+            grpAdopcion.Controls.Add(cmbFormaPago);
+            grpAdopcion.Controls.Add(numDonacion);
+            grpAdopcion.Controls.Add(label6);
             grpAdopcion.Controls.Add(btnGuardar);
             grpAdopcion.Controls.Add(txtObservaciones);
             grpAdopcion.Controls.Add(label5);
@@ -65,14 +72,33 @@
             grpAdopcion.Controls.Add(label2);
             grpAdopcion.Location = new Point(15, 48);
             grpAdopcion.Name = "grpAdopcion";
-            grpAdopcion.Size = new Size(395, 395);
+            grpAdopcion.Size = new Size(395, 476);
             grpAdopcion.TabIndex = 1;
             grpAdopcion.TabStop = false;
             grpAdopcion.Text = "Datos de la Adopción";
             // 
+            // numDonacion
+            // 
+            numDonacion.DecimalPlaces = 2;
+            numDonacion.Increment = new decimal(new int[] { 50, 0, 0, 0 });
+            numDonacion.Location = new Point(19, 383);
+            numDonacion.Maximum = new decimal(new int[] { 50000, 0, 0, 0 });
+            numDonacion.Name = "numDonacion";
+            numDonacion.Size = new Size(180, 34);
+            numDonacion.TabIndex = 2;
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(15, 352);
+            label6.Name = "label6";
+            label6.Size = new Size(222, 28);
+            label6.TabIndex = 2;
+            label6.Text = "Donación Voluntaria ($):";
+            // 
             // btnGuardar
             // 
-            btnGuardar.Location = new Point(190, 368);
+            btnGuardar.Location = new Point(191, 434);
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Size = new Size(189, 36);
             btnGuardar.TabIndex = 3;
@@ -152,11 +178,21 @@
             label2.TabIndex = 2;
             label2.Text = "Animal (Disponibles):";
             // 
+            // cmbFormaPago
+            // 
+            cmbFormaPago.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbFormaPago.FormattingEnabled = true;
+            cmbFormaPago.Items.AddRange(new object[] { "Efectivo ", "Transferencia  ", "Donación en especie" });
+            cmbFormaPago.Location = new Point(213, 383);
+            cmbFormaPago.Name = "cmbFormaPago";
+            cmbFormaPago.Size = new Size(182, 36);
+            cmbFormaPago.TabIndex = 2;
+            // 
             // FrmRegistroAdopcion
             // 
             AutoScaleDimensions = new SizeF(11F, 28F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(418, 468);
+            ClientSize = new Size(418, 547);
             Controls.Add(grpAdopcion);
             Controls.Add(label1);
             Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -168,6 +204,7 @@
             Click += FrmRegistroAdopcion_Load;
             grpAdopcion.ResumeLayout(false);
             grpAdopcion.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numDonacion).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -185,5 +222,8 @@
         private Label label4;
         private TextBox txtObservaciones;
         private Button btnGuardar;
+        private NumericUpDown numDonacion;
+        private Label label6;
+        private ComboBox cmbFormaPago;
     }
 }

@@ -47,6 +47,8 @@
             mosaicoHorizontalToolStripMenuItem1 = new ToolStripMenuItem();
             ventasToolStripMenuItem = new ToolStripMenuItem();
             carritoDeComprasToolStripMenuItem = new ToolStripMenuItem();
+            sesiónToolStripMenuItem = new ToolStripMenuItem();
+            cerrarSesiónToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -88,7 +90,7 @@
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(24, 24);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { módulosToolStripMenuItem, adopcionesToolStripMenuItem, ventanaToolStripMenuItem1, ventasToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { módulosToolStripMenuItem, adopcionesToolStripMenuItem, ventanaToolStripMenuItem1, ventasToolStripMenuItem, sesiónToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.MdiWindowListItem = módulosToolStripMenuItem;
             menuStrip1.Name = "menuStrip1";
@@ -156,21 +158,21 @@
             // cascadaToolStripMenuItem1
             // 
             cascadaToolStripMenuItem1.Name = "cascadaToolStripMenuItem1";
-            cascadaToolStripMenuItem1.Size = new Size(270, 34);
+            cascadaToolStripMenuItem1.Size = new Size(268, 34);
             cascadaToolStripMenuItem1.Text = "Cascada";
             cascadaToolStripMenuItem1.Click += cascadaToolStripMenuItem1_Click;
             // 
             // mosaicoVerticalToolStripMenuItem1
             // 
             mosaicoVerticalToolStripMenuItem1.Name = "mosaicoVerticalToolStripMenuItem1";
-            mosaicoVerticalToolStripMenuItem1.Size = new Size(270, 34);
+            mosaicoVerticalToolStripMenuItem1.Size = new Size(268, 34);
             mosaicoVerticalToolStripMenuItem1.Text = "Mosaico Vertical";
             mosaicoVerticalToolStripMenuItem1.Click += mosaicoVerticalToolStripMenuItem1_Click;
             // 
             // mosaicoHorizontalToolStripMenuItem1
             // 
             mosaicoHorizontalToolStripMenuItem1.Name = "mosaicoHorizontalToolStripMenuItem1";
-            mosaicoHorizontalToolStripMenuItem1.Size = new Size(270, 34);
+            mosaicoHorizontalToolStripMenuItem1.Size = new Size(268, 34);
             mosaicoHorizontalToolStripMenuItem1.Text = "Mosaico Horizontal";
             mosaicoHorizontalToolStripMenuItem1.Click += mosaicoHorizontalToolStripMenuItem1_Click;
             // 
@@ -184,9 +186,23 @@
             // carritoDeComprasToolStripMenuItem
             // 
             carritoDeComprasToolStripMenuItem.Name = "carritoDeComprasToolStripMenuItem";
-            carritoDeComprasToolStripMenuItem.Size = new Size(270, 34);
+            carritoDeComprasToolStripMenuItem.Size = new Size(269, 34);
             carritoDeComprasToolStripMenuItem.Text = "Carrito de Compras";
             carritoDeComprasToolStripMenuItem.Click += carritoDeComprasToolStripMenuItem_Click;
+            // 
+            // sesiónToolStripMenuItem
+            // 
+            sesiónToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { cerrarSesiónToolStripMenuItem });
+            sesiónToolStripMenuItem.Name = "sesiónToolStripMenuItem";
+            sesiónToolStripMenuItem.Size = new Size(80, 29);
+            sesiónToolStripMenuItem.Text = "Sesión";
+            // 
+            // cerrarSesiónToolStripMenuItem
+            // 
+            cerrarSesiónToolStripMenuItem.Name = "cerrarSesiónToolStripMenuItem";
+            cerrarSesiónToolStripMenuItem.Size = new Size(270, 34);
+            cerrarSesiónToolStripMenuItem.Text = "Cerrar Sesión";
+            cerrarSesiónToolStripMenuItem.Click += cerrarSesiónToolStripMenuItem_Click;
             // 
             // FrmPrincipalMDI
             // 
@@ -230,5 +246,7 @@
         private ToolStripMenuItem registrarAdopciónToolStripMenuItem;
         private ToolStripMenuItem ventasToolStripMenuItem;
         private ToolStripMenuItem carritoDeComprasToolStripMenuItem;
+        private ToolStripMenuItem sesiónToolStripMenuItem;
+        private ToolStripMenuItem cerrarSesiónToolStripMenuItem;
     }
 }

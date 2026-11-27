@@ -42,6 +42,7 @@
             label2 = new Label();
             grpHistorial = new GroupBox();
             dgvHistorial = new DataGridView();
+            chkDarDeAlta = new CheckBox();
             grpConsulta.SuspendLayout();
             grpHistorial.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvHistorial).BeginInit();
@@ -59,6 +60,7 @@
             // 
             // grpConsulta
             // 
+            grpConsulta.Controls.Add(chkDarDeAlta);
             grpConsulta.Controls.Add(btnLimpiar);
             grpConsulta.Controls.Add(btnGuardar);
             grpConsulta.Controls.Add(txtTratamiento);
@@ -102,7 +104,7 @@
             txtTratamiento.Multiline = true;
             txtTratamiento.Name = "txtTratamiento";
             txtTratamiento.ScrollBars = ScrollBars.Vertical;
-            txtTratamiento.Size = new Size(325, 110);
+            txtTratamiento.Size = new Size(325, 71);
             txtTratamiento.TabIndex = 0;
             // 
             // label5
@@ -192,6 +194,17 @@
             dgvHistorial.Size = new Size(615, 410);
             dgvHistorial.TabIndex = 0;
             // 
+            // chkDarDeAlta
+            // 
+            chkDarDeAlta.AutoSize = true;
+            chkDarDeAlta.Font = new Font("Segoe UI", 9F);
+            chkDarDeAlta.Location = new Point(-3, 364);
+            chkDarDeAlta.Name = "chkDarDeAlta";
+            chkDarDeAlta.Size = new Size(358, 29);
+            chkDarDeAlta.TabIndex = 3;
+            chkDarDeAlta.Text = "Dar de alta médica (Listo para adopción)";
+            chkDarDeAlta.UseVisualStyleBackColor = true;
+            // 
             // FrmHistorialMedico
             // 
             AutoScaleDimensions = new SizeF(11F, 28F);
@@ -230,5 +243,6 @@
         private TextBox txtTratamiento;
         private Label label5;
         private DataGridView dgvHistorial;
+        private CheckBox chkDarDeAlta;
     }
 }

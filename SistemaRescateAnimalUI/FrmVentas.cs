@@ -10,6 +10,7 @@ namespace SistemaRescateAnimalUI
 {
     public partial class FrmVentas : Form
     {
+        private List<Producto> _catalogoCompleto = new List<Producto>();
         private readonly ProductoDAO _productoDAO = new ProductoDAO();
         private readonly List<DetallePedido> _carrito = new List<DetallePedido>();
 
@@ -23,8 +24,9 @@ namespace SistemaRescateAnimalUI
         {
             try
             {
+                _catalogoCompleto = _productoDAO.BuscarPorNombreLike("");
                 dgvProductos.DataSource = null;
-                dgvProductos.DataSource = _productoDAO.BuscarPorNombreLike("");
+                dgvProductos.DataSource = _catalogoCompleto;
             }
             catch (Exception ex)
             {
@@ -35,15 +37,13 @@ namespace SistemaRescateAnimalUI
         // Búsqueda con like en tiempo real
         private void txtBuscarNombre_TextChanged(object sender, EventArgs e)
         {
-            try
-            {
-                dgvProductos.DataSource = null;
-                dgvProductos.DataSource = _productoDAO.BuscarPorNombreLike(txtBuscarNombre.Text.Trim());
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error en búsqueda dinámica: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            string filtro = txtBuscarNombre.Text.Trim().ToLower();
+            var filtrados = string.IsNullOrEmpty(filtro)
+                ? _catalogoCompleto
+                : _catalogoCompleto.Where(p => p.Nombre != null && p.Nombre.ToLower().Contains(filtro)).ToList();
+
+            dgvProductos.DataSource = null;
+            dgvProductos.DataSource = filtrados;
         }
 
         // Búsqueda  por ID
@@ -163,6 +163,11 @@ namespace SistemaRescateAnimalUI
             }
 
             MessageBox.Show($"Pedido validado correctamente ({_carrito.Count} partidas). Listo para persistencia transaccional.", "Confirmación de Pedido", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void txtBuscarNombre_TextChanged_1(object sender, EventArgs e)
+        {
+
         }
     }
 }

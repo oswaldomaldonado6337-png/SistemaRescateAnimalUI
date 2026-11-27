@@ -4,9 +4,9 @@
 // - GONZALEZ ALVARADO, Alexa Michelle
 // - MALDONADO LLAMAS, Oswaldo Daniel
 // ============================================================================
-using System.Xml.Serialization;
 using SistemaRescateAnimal.Datos;
 using SistemaRescateAnimal.Models;
+using SistemaRescateAnimalUI.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,6 +16,7 @@ using System.Media;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Serialization;
 
 namespace SistemaRescateAnimalUI
 {
@@ -57,11 +58,80 @@ namespace SistemaRescateAnimalUI
             InitializeComponent();
             ConfigurarValidaciones();
 
-            InicializarControlesPila();
-            InicializarControlesConcurrencia();
+            //InicializarControlesPila();
+            //InicializarControlesConcurrencia();
             InicializarControlImagen();
             ActualizarInterfaz();
+            ConfigurarEstadoInicialCRUD();
+            CargarTablaActivos();
         }
+        #region CONTROL DE ESTADOS CRUD, JAULAS Y LISTADO
+
+        private void ConfigurarEstadoInicialCRUD()
+        {
+            errorProvider1.Clear();
+
+            cmbCondicionHallazgo.Items.Clear();
+            cmbCondicionHallazgo.Items.AddRange(new object[] { "Estable", "En observación", "Herido / Requiere atención" });
+            cmbCondicionHallazgo.SelectedIndex = 0;
+
+            txtIdBusqueda.Clear();
+            txtNombre.Clear();
+            txtEspecie.Clear();
+            numPeso.Value = 0;
+            dtpFechaNacimiento.Value = DateTime.Today;
+            dtpFechaRegistro.Value = DateTime.Now;
+            txtLugarHallazgo.Clear();
+
+            txtUbicacionFisica.Text = _animalDAO.ObtenerPrimeraJaulaLibre();
+
+            txtIdBusqueda.Enabled = true;
+            btnMasterGuardar.Enabled = true;
+            btnMasterBuscar.Enabled = true;
+            btnMasterListar.Enabled = true;
+            btnMasterCancelar.Enabled = true;
+
+            btnMasterActualizar.Enabled = false;
+            btnMasterEliminar.Enabled = false;
+        }
+
+        private void ConfigurarEstadoEdicionCRUD()
+        {
+            txtIdBusqueda.Enabled = false;
+            btnMasterGuardar.Enabled = false;
+
+            btnMasterActualizar.Enabled = true;
+            btnMasterEliminar.Enabled = true;
+            if (SesionSistema.RolActivo == "Voluntario")
+            {
+                btnMasterEliminar.Enabled = false;
+            }
+        }
+
+        private void CargarTablaActivos()
+        {
+            dgvAnimales.DataSource = _animalDAO.ObtenerAnimalesActivos();
+            dgvAnimales.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        }
+
+        private void btnMasterListar_Click(object sender, EventArgs e)
+        {
+            CargarTablaActivos();
+        }
+
+        private void btnMasterCancelar_Click(object sender, EventArgs e)
+        {
+            ConfigurarEstadoInicialCRUD();
+            if (pbxFotografia.Image != null)
+            {
+                pbxFotografia.Image.Dispose();
+                pbxFotografia.Image = null;
+            }
+            rutaImagenTemporal = "";
+            rutaImagenActualDB = "";
+        }
+
+        #endregion
 
         private void ConfigurarValidaciones()
         {
@@ -421,12 +491,15 @@ namespace SistemaRescateAnimalUI
 
         public void EjecutarGuardar()
         {
+
             bool tieneErrores = string.IsNullOrWhiteSpace(txtNombre.Text) ||
                                 string.IsNullOrWhiteSpace(txtEspecie.Text) ||
+                                string.IsNullOrWhiteSpace(txtLugarHallazgo.Text) ||
                                 !double.TryParse(numPeso.Text, out double pVal) || pVal <= 0;
 
             if (string.IsNullOrWhiteSpace(txtNombre.Text)) errorProvider1.SetError(txtNombre, "Campo obligatorio.");
             if (string.IsNullOrWhiteSpace(txtEspecie.Text)) errorProvider1.SetError(txtEspecie, "Campo obligatorio.");
+            if (string.IsNullOrWhiteSpace(txtLugarHallazgo.Text)) errorProvider1.SetError(txtLugarHallazgo, "Campo obligatorio.");
             if (!double.TryParse(numPeso.Text, out double pCheck) || pCheck <= 0) errorProvider1.SetError(numPeso, "Ingrese peso mayor a 0.");
 
             if (tieneErrores)
@@ -489,20 +562,23 @@ namespace SistemaRescateAnimalUI
                                       ? ""
                                       : Path.Combine("ImagenesDatos", nombreArchivoFinal);
 
+                string condicion = cmbCondicionHallazgo.SelectedItem?.ToString() ?? "Estable";
+
                 AnimalRescatado animal = new AnimalRescatado
                 {
                     Id = idFinal,
                     Nombre = txtNombre.Text.Trim(),
                     Especie = txtEspecie.Text.Trim(),
                     Peso = double.TryParse(numPeso.Text, out double p) ? p : 0.0,
-                    FechaNacimientoEstimada = DateTime.Now.AddYears(-1),
-                    UbicacionFisica = "Refugio Central",
+                    FechaNacimientoEstimada = dtpFechaNacimiento.Value.Date,
+                    UbicacionFisica = txtUbicacionFisica.Text.Trim(),
                     FechaRescate = dtpFechaRegistro.Value,
-                    LugarHallazgo = "Zona Metropolitana",
-                    CondicionHallazgo = "Estable",
-                    FechaRegistro = dtpFechaRegistro.Value,
-                    EsActivo = chkEsActivo.Checked,
-                    RutaImagen = rutaRelativa
+                    LugarHallazgo = txtLugarHallazgo.Text.Trim(),
+                    CondicionHallazgo = condicion,
+                    EsActivo = true,
+                    RutaImagen = rutaRelativa,
+                    Estado = condicion == "Estable" ? "Disponible" : "En tratamiento"
+                    //Estado = condicion.Contains("Herido") ? "En tratamiento" : "Disponible"
                 };
 
                 // Guardado simultáneo en MariaDB y MongoDB Atlas
@@ -523,6 +599,8 @@ namespace SistemaRescateAnimalUI
                         pbxFotografia.Image = null;
                     }
                     rutaImagenTemporal = "";
+                    ConfigurarEstadoInicialCRUD();
+                    CargarTablaActivos();
                 }
             }
             catch (Exception ex)
@@ -548,6 +626,7 @@ namespace SistemaRescateAnimalUI
 
             if (string.IsNullOrWhiteSpace(txtNombre.Text) ||
                 string.IsNullOrWhiteSpace(txtEspecie.Text) ||
+                 string.IsNullOrWhiteSpace(txtLugarHallazgo.Text) ||
                 !double.TryParse(numPeso.Text, out double pVal) || pVal <= 0)
             {
                 MessageBox.Show("Corrija los errores (campos obligatorios y peso mayor a 0) antes de actualizar.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -603,15 +682,23 @@ namespace SistemaRescateAnimalUI
 
             try
             {
+                string condicion = cmbCondicionHallazgo.SelectedItem?.ToString() ?? "Estable";
+
                 AnimalRescatado animal = new AnimalRescatado
                 {
                     Id = txtIdBusqueda.Text.Trim(),
                     Nombre = txtNombre.Text.Trim(),
                     Especie = txtEspecie.Text.Trim(),
                     Peso = double.Parse(numPeso.Text),
+                    FechaNacimientoEstimada = dtpFechaNacimiento.Value.Date,
+                    UbicacionFisica = txtUbicacionFisica.Text.Trim(),
                     FechaRegistro = dtpFechaRegistro.Value,
-                    EsActivo = chkEsActivo.Checked,
-                    RutaImagen = rutaRelativaFinal
+                    LugarHallazgo = txtLugarHallazgo.Text.Trim(),
+                    CondicionHallazgo = condicion,
+                    EsActivo = true,
+                    RutaImagen = rutaRelativaFinal,
+                    Estado = condicion == "Estable" ? "Disponible" : "En tratamiento"
+                    //Estado = condicion.Contains("Herido") ? "En tratamiento" : "Disponible"
                 };
 
                 // Actualización simultánea en MariaDB y MongoDB Atlas
@@ -631,6 +718,8 @@ namespace SistemaRescateAnimalUI
                         pbxFotografia.Image.Dispose();
                         pbxFotografia.Image = null;
                     }
+                    ConfigurarEstadoInicialCRUD();
+                    CargarTablaActivos();
                 }
                 else
                 {
@@ -728,6 +817,8 @@ namespace SistemaRescateAnimalUI
                                 if (barraEstado.Items.Count == 0) barraEstado.Items.Add("Listo");
                                 barraEstado.Items[0].Text = $"Registro {idAEliminar} eliminado permanentemente.";
                             }
+                            ConfigurarEstadoInicialCRUD();
+                            CargarTablaActivos();
 
                             MessageBox.Show($"Registro ID {idAEliminar} y su fotografía fueron eliminados permanentemente de MariaDB, MongoDB y disco.", "Borrado Físico Exitoso", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
@@ -902,7 +993,7 @@ namespace SistemaRescateAnimalUI
 
                     if (datosRecuperados != null)
                     {
-                        
+
                         MessageBox.Show("Datos restaurados con éxito.", "Importación completada", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
@@ -964,6 +1055,15 @@ namespace SistemaRescateAnimalUI
                     dtpFechaRegistro.Value = resultado.FechaRegistro;
                     chkEsActivo.Checked = resultado.EsActivo;
 
+                    dtpFechaNacimiento.Value = resultado.FechaNacimientoEstimada == DateTime.MinValue ? DateTime.Today : resultado.FechaNacimientoEstimada;
+                    txtLugarHallazgo.Text = resultado.LugarHallazgo ?? "";
+                    txtUbicacionFisica.Text = resultado.UbicacionFisica ?? "";
+
+                    int idx = cmbCondicionHallazgo.FindStringExact(resultado.CondicionHallazgo ?? "Estable");
+                    cmbCondicionHallazgo.SelectedIndex = idx >= 0 ? idx : 0;
+
+                    ConfigurarEstadoEdicionCRUD();
+
                     // guardamos la ruta actual de la imagen y la mostramos
                     rutaImagenActualDB = resultado.RutaImagen ?? "";
                     rutaImagenTemporal = "";
@@ -1008,6 +1108,33 @@ namespace SistemaRescateAnimalUI
             {
                 MessageBox.Show("Error al buscar en la base de datos: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void chkEsActivo_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cmbCondicionHallazgo_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dgvAnimales_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            string id = dgvAnimales.Rows[e.RowIndex].Cells[0].Value?.ToString();
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                txtIdBusqueda.Text = id;
+                EjecutarBuscar(id, errorProvider1);
+            }
+        }
+
+        private void FrmAnimalRescatado_Load_1(object sender, EventArgs e)
+        {
+
         }
     }
 }

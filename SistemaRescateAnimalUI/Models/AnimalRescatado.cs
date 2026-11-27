@@ -20,6 +20,7 @@ namespace SistemaRescateAnimal.Models
         private static List<AnimalRescatado> _listaMemoria = new List<AnimalRescatado>();
 
         public string Nombre { get; set; } = string.Empty;
+        public string Estado { get; set; } = "Disponible";
         public string Especie { get; set; } = string.Empty;
         public double Peso { get; set; }
         public string RutaImagen { get; set; } = string.Empty;
